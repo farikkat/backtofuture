@@ -69,6 +69,53 @@ class ConversationManager {
   getSystemPrompt(customerProfile, language = 'English') {
     const firstName = customerProfile.firstName || customerProfile.name.split(' ')[0];
     
+    // Build comprehensive customer context
+    const tenure = customerProfile.customerTenure 
+      ? `${customerProfile.customerTenure.years} years ${customerProfile.customerTenure.months} months (${customerProfile.customerTenure.totalMonths} total) - ${customerProfile.customerTenure.message}`
+      : `${customerProfile.tenure} months`;
+    
+    const plan = customerProfile.currentPlanDetails 
+      ? `${customerProfile.currentPlanDetails.name} at $${customerProfile.currentPlanDetails.price}/month`
+      : `${customerProfile.currentPlan} at $${customerProfile.monthlyBill}/month`;
+    
+    const vasServices = customerProfile.vasServices && customerProfile.vasServices.length > 0
+      ? `Value Added Services: ${customerProfile.vasServices.join(', ')}`
+      : 'No additional services';
+    
+    const overdueInfo = customerProfile.overdueBalance
+      ? `⚠️ OVERDUE BALANCE: $${customerProfile.overdueBalance.amount} (${customerProfile.overdueBalance.aging}) - ${customerProfile.overdueBalance.message}`
+      : 'No overdue balance';
+    
+    const autoPayInfo = customerProfile.autoPayStatus
+      ? `AutoPay: ${customerProfile.autoPayStatus.enrolled ? 'Enrolled' : 'Not Enrolled'} - ${customerProfile.autoPayStatus.message}`
+      : 'AutoPay status unknown';
+    
+    const eBillInfo = customerProfile.eBillStatus
+      ? `E-Bill: ${customerProfile.eBillStatus.enrolled ? 'Enrolled' : 'Not Enrolled'} - ${customerProfile.eBillStatus.message}`
+      : 'E-Bill status unknown';
+    
+    const upsellInfo = customerProfile.upsellEligibility
+      ? `Upsell Eligibility: ${customerProfile.upsellEligibility.eligible ? 'YES' : 'NO'} - ${customerProfile.upsellEligibility.reason}`
+      : 'Upsell eligibility unknown';
+    
+    const troubleTickets = customerProfile.recentTroubleTickets
+      ? `Recent Trouble Tickets: ${customerProfile.recentTroubleTickets.count} - ${customerProfile.recentTroubleTickets.message}`
+      : 'No trouble ticket information';
+    
+    const billingEvents = customerProfile.recentBillingEvents
+      ? customerProfile.recentBillingEvents.hasChanges
+        ? `⚠️ BILLING CHANGE: ${customerProfile.recentBillingEvents.message} (${customerProfile.recentBillingEvents.changeType === 'increase' ? '+' : '-'}$${customerProfile.recentBillingEvents.changeAmount})`
+        : 'No recent billing changes'
+      : 'No billing event information';
+    
+    const accountStatus = customerProfile.accountStatus 
+      ? customerProfile.accountStatus.toUpperCase()
+      : 'ACTIVE';
+    
+    const lifetimeValue = customerProfile.lifetimeValue 
+      ? `$${customerProfile.lifetimeValue.toFixed(2)}`
+      : 'Unknown';
+    
     if (language === 'Spanish') {
       return `Eres un especialista empático en retención de clientes para una compañía de telecomunicaciones.
 
@@ -79,15 +126,53 @@ Tu objetivo es:
 4. Presentar ofertas de retención personalizadas cuando sea apropiado
 5. Resolver problemas o escalar a un agente humano si es necesario
 
-Contexto del Cliente:
+INFORMACIÓN COMPLETA DEL CLIENTE:
+═══════════════════════════════════════
+IDENTIDAD:
 - Nombre: ${customerProfile.name}
-- Antigüedad de la Cuenta: ${customerProfile.tenure} meses
-- Factura Mensual: $${customerProfile.monthlyBill}
-- Plan Actual: ${customerProfile.currentPlan}
+- Número de Cuenta: ${customerProfile.accountNumber || 'N/A'}
+- Estado de Cuenta: ${accountStatus}
+- Valor de por Vida: ${lifetimeValue}
 
-Directrices:
+ANTIGÜEDAD Y LEALTAD:
+- ${tenure}
+
+SERVICIOS Y FACTURACIÓN:
+- Plan Actual: ${plan}
+- ${vasServices}
+
+SITUACIÓN FINANCIERA:
+- ${overdueInfo}
+- ${autoPayInfo}
+- ${eBillInfo}
+- ${billingEvents}
+
+ELEGIBILIDAD Y OPORTUNIDADES:
+- ${upsellInfo}
+
+HISTORIAL DE SERVICIO:
+- ${troubleTickets}
+- Última Interacción: ${customerProfile.lastContactDate || 'Desconocida'}
+- Interacciones Totales: ${customerProfile.totalInteractions || 0}
+- Órdenes Abiertas: ${customerProfile.openOrders && customerProfile.openOrders.length > 0 ? customerProfile.openOrders.join('; ') : 'Ninguna'}
+
+NOTAS DEL AGENTE:
+${customerProfile.notes || 'Sin notas adicionales'}
+
+═══════════════════════════════════════
+
+INSTRUCCIONES CRÍTICAS:
+- IMPORTANTE: El cliente prefiere ESPAÑOL - responde SIEMPRE en español
+- Si hay saldo vencido, abórdalo con empatía y ofrece opciones de pago
+- Si hubo cambio de facturación reciente, reconócelo proactivamente
+- Si hay tickets de problemas, muestra comprensión por sus problemas pasados
+- Si son elegibles para upsell Y están satisfechos, menciona mejoras disponibles
+- Si NO son elegibles para upsell, enfócate en retención y resolución primero
+- Para clientes VIP o de alto valor vitalicio, ofrece tratamiento premium
+- Usa la información del historial para personalizar tu enfoque
+
+Directrices de Conversación:
 - Sé conversacional y cálido, no uses un guión
-- IMPORTANTE: Responde SIEMPRE en español - el cliente prefiere español
 - Haz preguntas aclaratorias para entender sus necesidades
 - Presenta 2-3 opciones de ofertas, déjales elegir
 - Si están muy molestos o tienen problemas complejos, ofrece transferir a un especialista
@@ -104,15 +189,53 @@ Your goal is to:
 4. Present personalized retention offers when appropriate
 5. Resolve issues or escalate to a human agent if needed
 
-Customer Context:
+COMPLETE CUSTOMER INSIGHTS:
+═══════════════════════════════════════
+IDENTITY:
 - Name: ${customerProfile.name}
-- Account Tenure: ${customerProfile.tenure} months
-- Monthly Bill: $${customerProfile.monthlyBill}
-- Current Plan: ${customerProfile.currentPlan}
+- Account Number: ${customerProfile.accountNumber || 'N/A'}
+- Account Status: ${accountStatus}
+- Lifetime Value: ${lifetimeValue}
 
-Guidelines:
+TENURE & LOYALTY:
+- ${tenure}
+
+SERVICES & BILLING:
+- Current Plan: ${plan}
+- ${vasServices}
+
+FINANCIAL SITUATION:
+- ${overdueInfo}
+- ${autoPayInfo}
+- ${eBillInfo}
+- ${billingEvents}
+
+ELIGIBILITY & OPPORTUNITIES:
+- ${upsellInfo}
+
+SERVICE HISTORY:
+- ${troubleTickets}
+- Last Contact: ${customerProfile.lastContactDate || 'Unknown'}
+- Total Interactions: ${customerProfile.totalInteractions || 0}
+- Open Orders: ${customerProfile.openOrders && customerProfile.openOrders.length > 0 ? customerProfile.openOrders.join('; ') : 'None'}
+
+AGENT NOTES:
+${customerProfile.notes || 'No additional notes'}
+
+═══════════════════════════════════════
+
+CRITICAL INSTRUCTIONS:
+- IMPORTANT: Customer prefers ENGLISH - always respond in English
+- If there's an overdue balance, address it empathetically and offer payment options
+- If there was a recent billing change, acknowledge it proactively
+- If there are trouble tickets, show understanding for their past issues
+- If they're eligible for upsell AND satisfied, mention available upgrades
+- If NOT eligible for upsell, focus on retention and resolution first
+- For VIP or high lifetime value customers, offer premium treatment
+- Use the history information to personalize your approach
+
+Conversation Guidelines:
 - Be conversational and warm, not scripted
-- IMPORTANT: Respond in English - the customer's preferred language
 - Ask clarifying questions to understand their needs
 - Present 2-3 offer options, let them choose
 - If they're very upset or have complex issues, offer to transfer to a specialist
