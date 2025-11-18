@@ -90,6 +90,7 @@ Navigate to: **http://localhost:3000** in your browser
 - 🎤 **Whisper STT** - High-accuracy speech-to-text
 - 📊 **Real-time Analysis** - Intent, sentiment, urgency
 - 💼 **Smart Offers** - Personalized retention offers
+- 🏠 **Movers Retention Flow** - Automated address verification & 1 Gig offers for FL/TX/CA
 - 🔄 **Session Management** - Conversation history tracking
 - 📡 **RESTful API** - 12+ endpoints
 - 🗄️ **MongoDB Integration** - Persistent customer data storage
@@ -344,6 +345,7 @@ curl http://localhost:3001/api/customer/scenarios/list
 - **[Enhanced Customer Profiles](ENHANCED_CUSTOMER_PROFILES.md)** - Customer insights and data structure
 - **[Spanish Language Support](SPANISH_LANGUAGE_SUPPORT.md)** - Bilingual agent capabilities
 - **[Recent Billing Events](RECENT_BILLING_EVENTS.md)** - Billing change tracking
+- **[Movers Retention Flow](MOVERS_RETENTION_FLOW.md)** - Address verification & 1 Gig offers for relocating customers
 - **[Speech Formatting Guide](SPEECH_FORMATTING.md)** - Natural TTS pronunciation of currency, dates, etc.
 - **[Speech Formatting Quick Start](SPEECH_FORMATTING_QUICKSTART.md)** - Get started with natural speech in 5 minutes
 - **[Customer Search Feature](CUSTOMER_SEARCH_FEATURE.md)** - Type-ahead search implementation
