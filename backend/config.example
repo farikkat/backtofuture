@@ -1,0 +1,28 @@
+# Copy this to .env and configure
+
+# Databricks Configuration
+DATABRICKS_HOST=https://dbc-4a93b454-f17b.cloud.databricks.com
+DATABRICKS_TOKEN=REDACTED_REPLACE_WITH_REAL_TOKEN
+
+# Primary LLM Model
+DATABRICKS_LLM_MODEL=databricks-claude-sonnet-4-5
+
+# Whisper Model
+DATABRICKS_WHISPER_MODEL=whisper-large-v3
+
+# OpenAI Whisper Fallback (optional)
+# If WebM audio format is detected and Databricks Whisper doesn't support it,
+# the system can automatically fall back to OpenAI's Whisper API
+OPENAI_API_KEY=sk-your-openai-api-key-here
+USE_OPENAI_WHISPER=false
+
+# Server Configuration
+PORT=3001
+NODE_ENV=development
+
+# Session Configuration
+SESSION_TIMEOUT_MINUTES=30
+
+# CORS - Frontend URL
+FRONTEND_URL=http://localhost:3000
+

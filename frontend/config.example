@@ -1,0 +1,8 @@
+# Frontend Configuration
+
+# Backend API URL
+API_URL=http://localhost:3001
+
+# Frontend Server Port
+PORT=3000
+

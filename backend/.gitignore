@@ -1,0 +1,22 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# Uploads
+uploads/
+*.webm
+*.mp3
+*.wav
+
+# OS files
+.DS_Store
+Thumbs.db
+
