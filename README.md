@@ -91,6 +91,7 @@ Navigate to: **http://localhost:3000** in your browser
 - 📊 **Real-time Analysis** - Intent, sentiment, urgency
 - 💼 **Smart Offers** - Personalized retention offers
 - 🏠 **Movers Retention Flow** - Automated address verification & 1 Gig offers for FL/TX/CA
+- 🔐 **Configurable Authentication** - Choose full (account+name+PIN) or quick (PIN-only) verification
 - 🔄 **Session Management** - Conversation history tracking
 - 📡 **RESTful API** - 12+ endpoints
 - 🗄️ **MongoDB Integration** - Persistent customer data storage
@@ -354,6 +355,7 @@ curl http://localhost:3001/api/customer/scenarios/list
 - **[Spanish Language Support](SPANISH_LANGUAGE_SUPPORT.md)** - Bilingual agent capabilities
 - **[Recent Billing Events](RECENT_BILLING_EVENTS.md)** - Billing change tracking
 - **[Movers Retention Flow](MOVERS_RETENTION_FLOW.md)** - Address verification & 1 Gig offers for relocating customers
+- **[Authentication Flow Configuration](AUTH_FLOW_CONFIGURATION.md)** - Full vs Quick PIN authentication modes
 - **[Female Voice Agent Configuration](FEMALE_VOICE_AGENT.md)** - Exclusive female voice selection
 - **[Fast & Concise Agent Configuration](FAST_CONCISE_AGENT.md)** - Optimized for speed and efficiency
 - **[Speech Formatting Guide](SPEECH_FORMATTING.md)** - Natural TTS pronunciation of currency, dates, etc.

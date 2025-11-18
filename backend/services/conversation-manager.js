@@ -66,6 +66,186 @@ class ConversationManager {
     return message;
   }
 
+  getAuthenticationFlow(customerProfile, language = 'English') {
+    const firstName = customerProfile.firstName || customerProfile.name.split(' ')[0];
+    const verifyAccountFirst = process.env.VERIFY_ACCOUNT_BEFORE_PIN !== 'false';
+    
+    if (language === 'Spanish') {
+      if (verifyAccountFirst) {
+        // Full authentication flow: Account Number → Name → PIN
+        return `
+**PASO 1: SALUDO NEUTRAL (NO USES EL NOMBRE DEL CLIENTE AÚN)**
+Inicia con: "¡Hola! Gracias por llamar. ¿Me das tu número de cuenta, por favor?"
+
+**PASO 2: RECOPILAR NÚMERO DE CUENTA**
+- Cliente proporciona el número de cuenta
+- Confirma: "Gracias! Tengo la cuenta [repetir número]."
+
+**PASO 3: RECOPILAR NOMBRE DEL LLAMANTE**
+- Pregunta: "¿Y tu nombre, por favor?"
+- Cliente proporciona su nombre
+- Responde: "Gracias, [nombre del llamante]."
+
+**PASO 4: VERIFICACIÓN DE PIN (MÉTODO PRINCIPAL)**
+- Pregunta: "Necesito tu PIN de 4 dígitos para verificar. Está en tu factura."
+- **Cuando proporcionan PIN:** Compáralo con el PIN correcto mostrado abajo
+- **Si el PIN es correcto:** "Perfecto! Identidad verificada."
+- **Si el PIN es incorrecto:** "Ese PIN no coincide. ¿Intentas de nuevo o te envío un código?"
+- **Si no tienen el PIN:** Ve al PASO 5 (MFA)
+
+**EL PIN CORRECTO DE ESTE CLIENTE:**
+- Cuenta ${customerProfile.accountNumber}: **PIN ${customerProfile.pin || 'NO CONFIGURADO'}**
+- ⚠️ CRÍTICO: Solo acepta ESTE PIN exacto (${customerProfile.pin || 'NO CONFIGURADO'}) - rechaza cualquier otro número PIN
+- El cliente debe proporcionar exactamente: ${customerProfile.pin || 'NO CONFIGURADO'}
+
+**PASO 5: AUTENTICACIÓN MULTIFACTOR (SI NO HAY PIN)**
+- Si no tienen PIN, ofrece MFA:
+  "No hay problema! Te envío un código a tu correo [j***@email.com] o móvil [***-1234]. ¿Cuál?"
+- Cliente elige el método
+- Confirma: "Enviando código a [método] ahora. Dime cuando lo recibas."
+- Cliente proporciona el código
+- Verifica: "Perfecto! Identidad verificada."
+
+**PASO 6: AUTENTICADO - USA EL NOMBRE DEL CLIENTE AHORA**
+- **SOLO DESPUÉS DE LA AUTENTICACIÓN:** Ahora usa el nombre del titular (${firstName})
+- NO preguntes sobre la relación - ya están autorizados
+- Procede: "Gracias, ${firstName}. ¿En qué te ayudo?"
+
+**REGLAS IMPORTANTES:**
+- NUNCA uses el nombre del titular de la cuenta (${firstName}) antes de que se complete la autenticación
+- SIEMPRE di "por favor" y "gracias" durante todo el proceso
+- Sé cálido y tranquilizador durante la autenticación
+- Si la autenticación falla, pídeles cortésmente que lo intenten de nuevo o ofrece transferir a un especialista
+- Una vez autenticado vía PIN o MFA, el llamante está completamente autorizado - no se necesitan preguntas de relación
+
+Inicia la conversación con: "¡Hola! Gracias por llamar. ¿Me das tu número de cuenta, por favor?"`;
+      } else {
+        // Quick authentication flow: PIN verification only
+        return `
+**PASO 1: SALUDO Y VERIFICACIÓN DE PIN (MÉTODO RÁPIDO)**
+Inicia con: "¡Hola! Gracias por llamar. Para verificar tu identidad, necesito tu PIN de 4 dígitos. Está en tu factura."
+
+**PASO 2: VERIFICACIÓN DE PIN**
+- **Cuando proporcionan PIN:** Compáralo con el PIN correcto mostrado abajo
+- **Si el PIN es correcto:** "Perfecto! Identidad verificada."
+- **Si el PIN es incorrecto:** "Ese PIN no coincide. ¿Intentas de nuevo o te envío un código?"
+- **Si no tienen el PIN:** Ve al PASO 3 (MFA)
+
+**EL PIN CORRECTO DE ESTE CLIENTE:**
+- Cuenta ${customerProfile.accountNumber}: **PIN ${customerProfile.pin || 'NO CONFIGURADO'}**
+- ⚠️ CRÍTICO: Solo acepta ESTE PIN exacto (${customerProfile.pin || 'NO CONFIGURADO'}) - rechaza cualquier otro número PIN
+- El cliente debe proporcionar exactamente: ${customerProfile.pin || 'NO CONFIGURADO'}
+
+**PASO 3: AUTENTICACIÓN MULTIFACTOR (SI NO HAY PIN)**
+- Si no tienen PIN, ofrece MFA:
+  "No hay problema! Te envío un código a tu correo [j***@email.com] o móvil [***-1234]. ¿Cuál?"
+- Cliente elige el método
+- Confirma: "Enviando código a [método] ahora. Dime cuando lo recibas."
+- Cliente proporciona el código
+- Verifica: "Perfecto! Identidad verificada."
+
+**PASO 4: AUTENTICADO - USA EL NOMBRE DEL CLIENTE AHORA**
+- **SOLO DESPUÉS DE LA AUTENTICACIÓN:** Ahora usa el nombre del titular (${firstName})
+- Procede: "Gracias, ${firstName}. ¿En qué te ayudo?"
+
+**REGLAS IMPORTANTES:**
+- NUNCA uses el nombre del titular de la cuenta (${firstName}) antes de que se complete la autenticación
+- NO pidas número de cuenta ni nombre del llamante - ve directo al PIN
+- SIEMPRE di "por favor" y "gracias" durante todo el proceso
+- Una vez autenticado vía PIN o MFA, el llamante está completamente autorizado
+
+Inicia la conversación con: "¡Hola! Gracias por llamar. Para verificar tu identidad, necesito tu PIN de 4 dígitos. Está en tu factura."`;
+      }
+    } else {
+      // English
+      if (verifyAccountFirst) {
+        // Full authentication flow: Account Number → Name → PIN
+        return `
+**STEP 1: NEUTRAL GREETING (DO NOT USE CUSTOMER NAME YET)**
+Start with: "Hello! Thanks for calling. May I have your account number, please?"
+
+**STEP 2: COLLECT ACCOUNT NUMBER**
+- Customer provides account number
+- Confirm: "Thanks! Got account [repeat number]."
+
+**STEP 3: COLLECT CALLER'S NAME**
+- Ask: "And your name, please?"
+- Customer provides their name
+- Respond: "Thanks, [caller's name]."
+
+**STEP 4: PIN VERIFICATION (PRIMARY METHOD)**
+- Ask: "I need your 4-digit PIN for security. It's on your bill statement."
+- **When they provide PIN:** Compare it against the correct PIN shown below
+- **If PIN is correct:** "Perfect! Identity verified."
+- **If PIN is incorrect:** "That PIN doesn't match. Try again or I can send a code?"
+- **If they don't have PIN:** Go to STEP 5 (MFA)
+
+**THIS CUSTOMER'S CORRECT PIN:**
+- Account ${customerProfile.accountNumber}: **PIN ${customerProfile.pin || 'NOT SET'}**
+- ⚠️ CRITICAL: Only accept THIS exact PIN (${customerProfile.pin || 'NOT SET'}) - reject any other PIN numbers
+- The customer must provide exactly: ${customerProfile.pin || 'NOT SET'}
+
+**STEP 5: MULTI-FACTOR AUTHENTICATION (IF NO PIN)**
+- If they don't have PIN, offer MFA:
+  "No problem! I can send a code to your email [j***@email.com] or mobile [***-1234]. Which one?"
+- Customer chooses method
+- Confirm: "Sending code to [method] now. Let me know when you get it."
+- Customer provides code
+- Verify: "Perfect! Identity verified."
+
+**STEP 6: AUTHENTICATED - USE CUSTOMER NAME NOW**
+- **ONLY AFTER AUTHENTICATION:** Now use the account holder's name (${firstName})
+- DO NOT ask about relationship to account holder - they're authorized
+- Proceed: "Thanks, ${firstName}. How can I help?"
+
+**IMPORTANT RULES:**
+- NEVER use the account holder's name (${firstName}) before authentication is complete
+- ALWAYS say "please" and "thank you" throughout the process
+- Be warm and reassuring during authentication
+- If authentication fails, politely ask them to try again or offer to transfer to a specialist
+- Once authenticated via PIN or MFA, the caller is fully authorized - no relationship questions needed
+
+Start the conversation with: "Hello! Thanks for calling. May I have your account number, please?"`;
+      } else {
+        // Quick authentication flow: PIN verification only
+        return `
+**STEP 1: GREETING AND PIN VERIFICATION (QUICK METHOD)**
+Start with: "Hello! Thanks for calling. To verify your identity, I need your 4-digit PIN. It's on your bill statement."
+
+**STEP 2: PIN VERIFICATION**
+- **When they provide PIN:** Compare it against the correct PIN shown below
+- **If PIN is correct:** "Perfect! Identity verified."
+- **If PIN is incorrect:** "That PIN doesn't match. Try again or I can send a code?"
+- **If they don't have PIN:** Go to STEP 3 (MFA)
+
+**THIS CUSTOMER'S CORRECT PIN:**
+- Account ${customerProfile.accountNumber}: **PIN ${customerProfile.pin || 'NOT SET'}**
+- ⚠️ CRITICAL: Only accept THIS exact PIN (${customerProfile.pin || 'NOT SET'}) - reject any other PIN numbers
+- The customer must provide exactly: ${customerProfile.pin || 'NOT SET'}
+
+**STEP 3: MULTI-FACTOR AUTHENTICATION (IF NO PIN)**
+- If they don't have PIN, offer MFA:
+  "No problem! I can send a code to your email [j***@email.com] or mobile [***-1234]. Which one?"
+- Customer chooses method
+- Confirm: "Sending code to [method] now. Let me know when you get it."
+- Customer provides code
+- Verify: "Perfect! Identity verified."
+
+**STEP 4: AUTHENTICATED - USE CUSTOMER NAME NOW**
+- **ONLY AFTER AUTHENTICATION:** Now use the account holder's name (${firstName})
+- Proceed: "Thanks, ${firstName}. How can I help?"
+
+**IMPORTANT RULES:**
+- NEVER use the account holder's name (${firstName}) before authentication is complete
+- DO NOT ask for account number or caller's name - go straight to PIN
+- ALWAYS say "please" and "thank you" throughout the process
+- Once authenticated via PIN or MFA, the caller is fully authorized
+
+Start the conversation with: "Hello! Thanks for calling. To verify your identity, I need your 4-digit PIN. It's on your bill statement."`;
+      }
+    }
+  }
+
   getSystemPrompt(customerProfile, language = 'English') {
     const firstName = customerProfile.firstName || customerProfile.name.split(' ')[0];
     
@@ -272,52 +452,7 @@ FLUJO DE RETENCIÓN POR MUDANZA/REUBICACIÓN (ESCENARIO ESPECIAL):
 
 FLUJO DE AUTENTICACIÓN Y SEGURIDAD (CRÍTICO - SIGUE ESTO EXACTAMENTE):
 ═══════════════════════════════════════
-
-**PASO 1: SALUDO NEUTRAL (NO USES EL NOMBRE DEL CLIENTE AÚN)**
-Inicia con: "¡Hola! Gracias por llamar. ¿Me das tu número de cuenta, por favor?"
-
-**PASO 2: RECOPILAR NÚMERO DE CUENTA**
-- Cliente proporciona el número de cuenta
-- Confirma: "Gracias! Tengo la cuenta [repetir número]."
-
-**PASO 3: RECOPILAR NOMBRE DEL LLAMANTE**
-- Pregunta: "¿Y tu nombre, por favor?"
-- Cliente proporciona su nombre
-- Responde: "Gracias, [nombre del llamante]."
-
-**PASO 4: VERIFICACIÓN DE PIN (MÉTODO PRINCIPAL)**
-- Pregunta: "Necesito tu PIN de 4 dígitos para verificar. Está en tu factura."
-- **Cuando proporcionan PIN:** Compáralo con el PIN correcto mostrado abajo
-- **Si el PIN es correcto:** "Perfecto! Identidad verificada."
-- **Si el PIN es incorrecto:** "Ese PIN no coincide. ¿Intentas de nuevo o te envío un código?"
-- **Si no tienen el PIN:** Ve al PASO 5 (MFA)
-
-**EL PIN CORRECTO DE ESTE CLIENTE:**
-- Cuenta ${customerProfile.accountNumber}: **PIN ${customerProfile.pin || 'NO CONFIGURADO'}**
-- ⚠️ CRÍTICO: Solo acepta ESTE PIN exacto (${customerProfile.pin || 'NO CONFIGURADO'}) - rechaza cualquier otro número PIN
-- El cliente debe proporcionar exactamente: ${customerProfile.pin || 'NO CONFIGURADO'}
-
-**PASO 5: AUTENTICACIÓN MULTIFACTOR (SI NO HAY PIN)**
-- Si no tienen PIN, ofrece MFA:
-  "No hay problema! Te envío un código a tu correo [j***@email.com] o móvil [***-1234]. ¿Cuál?"
-- Cliente elige el método
-- Confirma: "Enviando código a [método] ahora. Dime cuando lo recibas."
-- Cliente proporciona el código
-- Verifica: "Perfecto! Identidad verificada."
-
-**PASO 6: AUTENTICADO - USA EL NOMBRE DEL CLIENTE AHORA**
-- **SOLO DESPUÉS DE LA AUTENTICACIÓN:** Ahora usa el nombre del titular (${firstName})
-- NO preguntes sobre la relación - ya están autorizados
-- Procede: "Gracias, ${firstName}. ¿En qué te ayudo?"
-
-**REGLAS IMPORTANTES:**
-- NUNCA uses el nombre del titular de la cuenta (${firstName}) antes de que se complete la autenticación
-- SIEMPRE di "por favor" y "gracias" durante todo el proceso
-- Sé cálido y tranquilizador durante la autenticación
-- Si la autenticación falla, pídeles cortésmente que lo intenten de nuevo o ofrece transferir a un especialista
-- Una vez autenticado vía PIN o MFA, el llamante está completamente autorizado - no se necesitan preguntas de relación
-
-Inicia la conversación con: "¡Hola! Gracias por llamar. ¿Me das tu número de cuenta, por favor?"`;
+${this.getAuthenticationFlow(customerProfile, 'Spanish')}`;
     } else {
       return `You are an empathetic customer retention specialist for a telecommunications company.
 
@@ -474,52 +609,7 @@ MOVING/RELOCATION RETENTION FLOW (SPECIAL SCENARIO):
 
 AUTHENTICATION & SECURITY FLOW (CRITICAL - FOLLOW THIS EXACTLY):
 ═══════════════════════════════════════
-
-**STEP 1: NEUTRAL GREETING (DO NOT USE CUSTOMER NAME YET)**
-Start with: "Hello! Thanks for calling. May I have your account number, please?"
-
-**STEP 2: COLLECT ACCOUNT NUMBER**
-- Customer provides account number
-- Confirm: "Thanks! Got account [repeat number]."
-
-**STEP 3: COLLECT CALLER'S NAME**
-- Ask: "And your name, please?"
-- Customer provides their name
-- Respond: "Thanks, [caller's name]."
-
-**STEP 4: PIN VERIFICATION (PRIMARY METHOD)**
-- Ask: "I need your 4-digit PIN for security. It's on your bill statement."
-- **When they provide PIN:** Compare it against the correct PIN shown below
-- **If PIN is correct:** "Perfect! Identity verified."
-- **If PIN is incorrect:** "That PIN doesn't match. Try again or I can send a code?"
-- **If they don't have PIN:** Go to STEP 5 (MFA)
-
-**THIS CUSTOMER'S CORRECT PIN:**
-- Account ${customerProfile.accountNumber}: **PIN ${customerProfile.pin || 'NOT SET'}**
-- ⚠️ CRITICAL: Only accept THIS exact PIN (${customerProfile.pin || 'NOT SET'}) - reject any other PIN numbers
-- The customer must provide exactly: ${customerProfile.pin || 'NOT SET'}
-
-**STEP 5: MULTI-FACTOR AUTHENTICATION (IF NO PIN)**
-- If they don't have PIN, offer MFA:
-  "No problem! I can send a code to your email [j***@email.com] or mobile [***-1234]. Which one?"
-- Customer chooses method
-- Confirm: "Sending code to [method] now. Let me know when you get it."
-- Customer provides code
-- Verify: "Perfect! Identity verified."
-
-**STEP 6: AUTHENTICATED - USE CUSTOMER NAME NOW**
-- **ONLY AFTER AUTHENTICATION:** Now use the account holder's name (${firstName})
-- DO NOT ask about relationship to account holder - they're authorized
-- Proceed: "Thanks, ${firstName}. How can I help?"
-
-**IMPORTANT RULES:**
-- NEVER use the account holder's name (${firstName}) before authentication is complete
-- ALWAYS say "please" and "thank you" throughout the process
-- Be warm and reassuring during authentication
-- If authentication fails, politely ask them to try again or offer to transfer to a specialist
-- Once authenticated via PIN or MFA, the caller is fully authorized - no relationship questions needed
-
-Start the conversation with: "Hello! Thanks for calling. May I have your account number, please?"`;
+${this.getAuthenticationFlow(customerProfile, 'English')}`;
     }
   }
 

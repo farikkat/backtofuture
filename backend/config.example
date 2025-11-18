@@ -23,6 +23,11 @@ NODE_ENV=development
 # Session Configuration
 SESSION_TIMEOUT_MINUTES=30
 
+# Authentication Configuration
+# If true: Verify account number and name before PIN
+# If false: Skip account/name verification and go straight to PIN
+VERIFY_ACCOUNT_BEFORE_PIN=true
+
 # CORS - Frontend URL
 FRONTEND_URL=http://localhost:3000
 
