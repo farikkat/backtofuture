@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Retention Agent - Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🤖 AI Voice Retention Agent</h1>
+                <p class="subtitle">Intelligent customer retention powered by Databricks AI</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel: Customer Selection & Info -->
+            <aside class="left-panel">
+                <div class="panel-section">
+                    <h2>Demo Scenario</h2>
+                    <select id="customerSelect" class="customer-select">
+                        <option value="">Select a customer...</option>
+                    </select>
+                    <button id="startCallBtn" class="btn btn-primary" disabled>
+                        📞 Start Call
+                    </button>
+                </div>
+
+                <div id="customerInfo" class="panel-section customer-info" style="display: none;">
+                    <h3>Customer Profile</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">Name:</span>
+                            <span id="custName" class="value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Plan:</span>
+                            <span id="custPlan" class="value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Monthly Bill:</span>
+                            <span id="custBill" class="value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Tenure:</span>
+                            <span id="custTenure" class="value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Status:</span>
+                            <span id="custStatus" class="value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">LTV:</span>
+                            <span id="custLTV" class="value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="conversationState" class="panel-section conversation-state" style="display: none;">
+                    <h3>AI Analysis</h3>
+                    <div class="state-item">
+                        <span class="label">Intent:</span>
+                        <span id="intentBadge" class="badge badge-neutral">-</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="label">Sentiment:</span>
+                        <span id="sentimentBadge" class="badge badge-neutral">-</span>
+                    </div>
+                    <div class="state-item">
+                        <span class="label">Urgency:</span>
+                        <div class="urgency-meter">
+                            <div id="urgencyBar" class="urgency-bar" style="width: 0%"></div>
+                            <span id="urgencyText" class="urgency-text">0/10</span>
+                        </div>
+                    </div>
+                    <div class="state-item">
+                        <span class="label">Language:</span>
+                        <span id="languageBadge" class="badge badge-info">-</span>
+                    </div>
+                </div>
+
+                <div id="offersPanel" class="panel-section offers-panel" style="display: none;">
+                    <h3>Retention Offers</h3>
+                    <div id="offersList" class="offers-list">
+                        <!-- Offers will be dynamically added here -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Center Panel: Conversation -->
+            <main class="center-panel">
+                <div class="conversation-header">
+                    <div class="status-indicator">
+                        <span id="callStatus" class="status-dot"></span>
+                        <span id="callStatusText">No active call</span>
+                    </div>
+                    <div class="call-controls">
+                        <button id="endCallBtn" class="btn btn-danger" disabled>
+                            📞 End Call
+                        </button>
+                        <button id="transferBtn" class="btn btn-warning" disabled>
+                            👤 Transfer to Agent
+                        </button>
+                    </div>
+                </div>
+
+                <div id="conversationArea" class="conversation-area">
+                    <div class="welcome-message">
+                        <h2>Welcome to the AI Retention Agent Demo</h2>
+                        <p>Select a customer scenario from the left panel to begin.</p>
+                        <ul class="features-list">
+                            <li>🎯 Real-time intent detection</li>
+                            <li>😊 Sentiment analysis</li>
+                            <li>💼 Personalized retention offers</li>
+                            <li>🌐 Bilingual support (English/Spanish)</li>
+                            <li>🎤 Voice and text input</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="inputArea" class="input-area" style="display: none;">
+                    <div class="transcription-settings">
+                        <label for="transcriptionMethod">Voice Input Method:</label>
+                        <select id="transcriptionMethod" class="transcription-select">
+                            <option value="webspeech">🚀 Web Speech API (Free, Real-time)</option>
+                            <option value="backend">☁️ Backend Transcription (Accurate, Costs $)</option>
+                        </select>
+                    </div>
+                    <div class="input-controls">
+                        <button id="voiceBtn" class="btn btn-icon" title="Voice Input">
+                            🎤
+                        </button>
+                        <input 
+                            type="text" 
+                            id="messageInput" 
+                            class="message-input" 
+                            placeholder="Type your message..."
+                            disabled
+                        />
+                        <button id="sendBtn" class="btn btn-primary" disabled>
+                            Send
+                        </button>
+                    </div>
+                    <div id="voiceStatus" class="voice-status" style="display: none;">
+                        <span class="recording-indicator"></span>
+                        <span id="recordingText">Recording... <span id="recordingTimer">0.0s</span></span>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Transfer Summary Modal -->
+    <div id="transferModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Transfer to Human Agent</h2>
+                <button class="modal-close" onclick="closeTransferModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="transferSummary" class="transfer-summary">
+                    <!-- Summary content will be inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeTransferModal()">Close</button>
+                <button class="btn btn-primary" onclick="confirmTransfer()">Confirm Transfer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p>Processing...</p>
+    </div>
+
+    <!-- Load configuration first -->
+    <script src="config.js"></script>
+    <!-- Then load app -->
+    <script src="app.js"></script>
+</body>
+</html>
+
