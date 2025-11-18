@@ -105,6 +105,7 @@ Navigate to: **http://localhost:3000** in your browser
 - 🎤 **Voice Input** - Record and transcribe audio
 - 🔊 **Voice Output** - Natural text-to-speech (e.g., "$29.99" → "twenty-nine ninety-nine")
 - 👩 **Female Voice Agents** - Exclusively professional female voices for warm, consistent service
+- 💝 **Natural & Warm Voice** - Emotionally attuned with empathetic pauses and human-like intonation
 - ⚡ **Fast & Concise** - Agent speaks 30% faster with 60% fewer words for efficient service
 - 🔍 **Type-Ahead Search** - Fast customer search by name or account
 - 📈 **Live Analytics** - Intent/sentiment visualization
@@ -357,6 +358,7 @@ curl http://localhost:3001/api/customer/scenarios/list
 - **[Movers Retention Flow](MOVERS_RETENTION_FLOW.md)** - Address verification & 1 Gig offers for relocating customers
 - **[Authentication Flow Configuration](AUTH_FLOW_CONFIGURATION.md)** - Full vs Quick PIN authentication modes
 - **[Female Voice Agent Configuration](FEMALE_VOICE_AGENT.md)** - Exclusive female voice selection
+- **[Natural, Warm, & Empathetic Voice](NATURAL_WARM_VOICE.md)** - Emotionally attuned voice with human-like warmth
 - **[Fast & Concise Agent Configuration](FAST_CONCISE_AGENT.md)** - Optimized for speed and efficiency
 - **[Speech Formatting Guide](SPEECH_FORMATTING.md)** - Natural TTS pronunciation of currency, dates, etc.
 - **[Speech Formatting Quick Start](SPEECH_FORMATTING_QUICKSTART.md)** - Get started with natural speech in 5 minutes

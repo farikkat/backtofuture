@@ -1096,10 +1096,10 @@ function speak(text, language = 'English') {
     // Language settings
     utterance.lang = language === 'Spanish' ? 'es-US' : 'en-US';
     
-    // Fast, efficient settings for quick communication
-    utterance.rate = 1.25;    // Faster speech rate for efficiency
-    utterance.pitch = 1.05;   // Slightly higher pitch for friendliness
-    utterance.volume = 1.0;   // Full volume for clarity
+    // Natural, warm, emotionally attuned settings
+    utterance.rate = 1.1;     // Slightly faster than natural (1.0) but warm, not rushed
+    utterance.pitch = 1.08;   // Warm, friendly pitch - higher for approachability
+    utterance.volume = 0.95;  // Slightly softer for warmth and intimacy
     
     // Select the most natural, warm voice available
     const voices = window.speechSynthesis.getVoices();
@@ -1110,7 +1110,7 @@ function speak(text, language = 'English') {
     
     // Add emotion through event handlers
     utterance.onstart = () => {
-        console.log('🎙️ Speaking with natural, warm tone...');
+        console.log('🎙️💝 Speaking with warmth, empathy, and natural human-like intonation...');
     };
     
     utterance.onerror = (event) => {
@@ -1121,24 +1121,37 @@ function speak(text, language = 'English') {
 }
 
 /**
- * Add natural pauses to text for more conversational flow
+ * Add natural pauses and emotional emphasis for conversational, warm flow
  */
 function addNaturalPauses(text) {
     if (!text) return text;
     
-    // Add slight pauses after sentence markers for natural rhythm
+    // Add emotional pauses after sentence markers for natural, warm rhythm
     let natural = text
-        .replace(/\. /g, '.  ')        // Pause after periods
-        .replace(/\? /g, '?  ')        // Pause after questions
-        .replace(/! /g, '!  ')         // Pause after exclamations
-        .replace(/\, /g, ', ')         // Slight pause after commas
-        .replace(/\; /g, ';  ')        // Pause after semicolons
-        .replace(/\: /g, ':  ');       // Pause after colons
+        .replace(/\. /g, '...  ')      // Longer pause after periods for reflection
+        .replace(/\? /g, '?  ')        // Natural pause after questions - inviting response
+        .replace(/! /g, '!  ')         // Pause after exclamations - emphasis
+        .replace(/\, /g, ', ')         // Gentle pause after commas - breathing room
+        .replace(/\; /g, ';  ')        // Thoughtful pause after semicolons
+        .replace(/\: /g, ':  ');       // Anticipatory pause after colons
     
-    // Add natural pauses before important phrases
+    // Add empathetic pauses before caring phrases
+    natural = natural
+        .replace(/\b(I understand|I hear you|I get it|I see)\b/gi, '  $1')
+        .replace(/\b(I'm sorry|I apologize|my apologies)\b/gi, '  $1')
+        .replace(/\b(thank you|thanks|appreciate)\b/gi, '  $1')
+        .replace(/\b(please|kindly)\b/gi, ' $1');
+    
+    // Add natural pauses before transitional phrases for smooth flow
     natural = natural
         .replace(/\b(however|but|and|so|because|since|therefore)\b/gi, ' $1')
-        .replace(/\b(I understand|I see|I know|I can|let me)\b/gi, ' $1');
+        .replace(/\b(let me|I can|I'd love to|I'm happy to)\b/gi, '  $1')
+        .replace(/\b(here's|now|first|next|also)\b/gi, ' $1');
+    
+    // Add pauses before important information for emphasis
+    natural = natural
+        .replace(/\b(perfect|excellent|great|wonderful)\b/gi, '  $1')
+        .replace(/\b(important|critical|key|note)\b/gi, ' $1');
     
     return natural;
 }
@@ -1175,37 +1188,38 @@ function selectNaturalVoice(voices, language) {
         });
     }
     
-    // Priority list of preferred FEMALE voices
+    // Priority list of WARMEST, MOST NATURAL FEMALE voices
+    // Ordered by emotional warmth, naturalness, and conversational quality
     const preferredFemaleVoices = isSpanish ? [
-        // Spanish - Female voices only
-        'Paulina',            // Very natural
-        'Monica',             // Warm
-        'Mónica',             // Warm (accented)
-        'Microsoft Helena',   // Professional
-        'Paloma',             // Natural
-        'Carmen',             // Friendly
-        'Lucia',              // Warm
-        'Google español',     // Usually female
+        // Spanish - Warmest, most emotionally attuned female voices first
+        'Paulina',            // ⭐ BEST: Very natural, warm, conversational
+        'Monica',             // ⭐ Warm, empathetic tone
+        'Mónica',             // ⭐ Warm (accented), friendly
+        'Carmen',             // Friendly, approachable
+        'Lucia',              // Warm, caring tone
+        'Paloma',             // Natural, smooth
+        'Microsoft Helena',   // Professional but warm
+        'Google español',     // Natural female voice
         'Google español de Estados Unidos',
         'es-US Female',
         'es-MX Female',
         'es-ES Female'
     ] : [
-        // English - Female voices only
-        'Samantha',           // macOS - very natural and warm
-        'Karen',              // macOS - warm and friendly
-        'Moira',              // macOS - professional
-        'Tessa',              // macOS - empathetic
-        'Microsoft Zira',     // Windows - natural female
-        'Microsoft Eva',      // Windows - professional female
+        // English - Warmest, most emotionally attuned female voices first
+        'Samantha',           // ⭐ BEST: macOS - exceptionally natural, warm, human-like
+        'Tessa',              // ⭐ macOS - very empathetic, caring, perfect for customer service
+        'Karen',              // ⭐ macOS - warm, friendly, approachable
+        'Heather',            // macOS - warm, gentle, comforting
+        'Moira',              // macOS - professional yet warm
+        'Serena',             // Windows - friendly, personable
+        'Microsoft Zira',     // Windows - natural, warm female
+        'Microsoft Eva',      // Windows - professional but friendly
+        'Allison',            // macOS - professional, clear, warm
         'Google US English Female',
         'Google UK English Female',
-        'Susan',              // macOS - clear
+        'Susan',              // macOS - clear, reliable
         'Victoria',           // macOS - professional
-        'Fiona',              // macOS - Scottish accent
-        'Serena',             // Windows - friendly
-        'Heather',            // macOS - warm
-        'Allison',            // macOS - professional
+        'Fiona',              // macOS - Scottish accent, unique warmth
         'en-US Female',
         'en-GB Female'
     ];
@@ -1216,7 +1230,7 @@ function selectNaturalVoice(voices, language) {
             v.name.toLowerCase().includes(name.toLowerCase())
         );
         if (voice) {
-            console.log(`✅ Selected female voice: ${voice.name} (${voice.lang})`);
+            console.log(`✅ Selected warm, natural female voice: ${voice.name} (${voice.lang}) - Optimized for emotional warmth and human-like conversation`);
             return voice;
         }
     }
@@ -1227,14 +1241,14 @@ function selectNaturalVoice(voices, language) {
         v.name.toLowerCase().includes('woman')
     );
     if (explicitFemaleVoice) {
-        console.log(`✅ Selected explicit female voice: ${explicitFemaleVoice.name}`);
+        console.log(`✅ Selected warm female voice: ${explicitFemaleVoice.name} - Natural and caring tone`);
         return explicitFemaleVoice;
     }
     
-    // Fallback 2: Female voices with common female names
+    // Fallback 2: Female voices with common warm, friendly names
     const commonFemaleNames = [
-        'samantha', 'karen', 'moira', 'tessa', 'zira', 'eva', 'helena',
-        'susan', 'victoria', 'fiona', 'serena', 'heather', 'allison',
+        'samantha', 'tessa', 'karen', 'heather', 'moira', 'serena',
+        'zira', 'eva', 'helena', 'allison', 'susan', 'victoria', 'fiona',
         'paulina', 'monica', 'lucia', 'carmen', 'paloma', 'maria'
     ];
     
@@ -1242,25 +1256,25 @@ function selectNaturalVoice(voices, language) {
         commonFemaleNames.some(name => v.name.toLowerCase().includes(name))
     );
     if (namedFemaleVoice) {
-        console.log(`✅ Selected named female voice: ${namedFemaleVoice.name}`);
+        console.log(`✅ Selected natural female voice: ${namedFemaleVoice.name} - Warm and empathetic`);
         return namedFemaleVoice;
     }
     
-    // Fallback 3: Local female voices (better quality)
+    // Fallback 3: Local female voices (better quality, more natural)
     const localFemaleVoices = femaleVoices.filter(v => v.localService);
     if (localFemaleVoices.length > 0) {
-        console.log(`✅ Selected local female voice: ${localFemaleVoices[0].name}`);
+        console.log(`✅ Selected local female voice: ${localFemaleVoices[0].name} - High quality, warm tone`);
         return localFemaleVoices[0];
     }
     
     // Fallback 4: Any female voice available
     if (femaleVoices.length > 0) {
-        console.log(`✅ Selected fallback female voice: ${femaleVoices[0].name}`);
+        console.log(`✅ Selected available female voice: ${femaleVoices[0].name} - Warm and friendly`);
         return femaleVoices[0];
     }
     
     // Last resort: Use any available voice (shouldn't happen but for safety)
-    console.warn('⚠️ No female voices found, using first available voice');
+    console.warn('⚠️ No female voices found - using first available voice (may not be optimal for warmth)');
     return voices[0];
 }
 
