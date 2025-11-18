@@ -10,6 +10,9 @@ class ConversationManager {
   createSession(customerId, customerProfile) {
     const sessionId = uuidv4();
     
+    // Use customer's preferred language, default to English if not specified
+    const preferredLanguage = customerProfile.preferredLanguage || 'English';
+    
     const session = {
       sessionId,
       customerId,
@@ -18,7 +21,7 @@ class ConversationManager {
       intent: null,
       sentiment: 'neutral',
       urgency: 5,
-      language: 'English',
+      language: preferredLanguage,
       keyConcerns: [],
       offers: [],
       startTime: new Date(),
@@ -28,7 +31,7 @@ class ConversationManager {
 
     this.sessions.set(sessionId, session);
     
-    console.log(`[ConversationManager] Created session ${sessionId} for customer ${customerId}`);
+    console.log(`[ConversationManager] Created session ${sessionId} for customer ${customerId} (Language: ${preferredLanguage})`);
     return session;
   }
 
@@ -64,11 +67,35 @@ class ConversationManager {
   }
 
   getSystemPrompt(customerProfile, language = 'English') {
-    const greeting = language === 'Spanish' 
-      ? `Hola ${customerProfile.name.split(' ')[0]}`
-      : `Hello ${customerProfile.name.split(' ')[0]}`;
+    const firstName = customerProfile.firstName || customerProfile.name.split(' ')[0];
+    
+    if (language === 'Spanish') {
+      return `Eres un especialista empático en retención de clientes para una compañía de telecomunicaciones.
 
-    return `You are an empathetic customer retention specialist for a telecommunications company.
+Tu objetivo es:
+1. Escuchar activamente y comprender las preocupaciones del cliente
+2. Mostrar empatía genuina y profesionalismo
+3. Identificar la causa raíz de su insatisfacción
+4. Presentar ofertas de retención personalizadas cuando sea apropiado
+5. Resolver problemas o escalar a un agente humano si es necesario
+
+Contexto del Cliente:
+- Nombre: ${customerProfile.name}
+- Antigüedad de la Cuenta: ${customerProfile.tenure} meses
+- Factura Mensual: $${customerProfile.monthlyBill}
+- Plan Actual: ${customerProfile.currentPlan}
+
+Directrices:
+- Sé conversacional y cálido, no uses un guión
+- IMPORTANTE: Responde SIEMPRE en español - el cliente prefiere español
+- Haz preguntas aclaratorias para entender sus necesidades
+- Presenta 2-3 opciones de ofertas, déjales elegir
+- Si están muy molestos o tienen problemas complejos, ofrece transferir a un especialista
+- Mantén las respuestas concisas (2-4 oraciones máximo)
+
+Inicia la conversación con: "Hola ${firstName}, gracias por llamar. Entiendo que está considerando hacer cambios en su cuenta. Estoy aquí para ayudar - ¿puede contarme qué está motivando su llamada hoy?"`;
+    } else {
+      return `You are an empathetic customer retention specialist for a telecommunications company.
 
 Your goal is to:
 1. Listen actively and understand customer concerns
@@ -85,13 +112,14 @@ Customer Context:
 
 Guidelines:
 - Be conversational and warm, not scripted
-- Use the customer's preferred language (${language})
+- IMPORTANT: Respond in English - the customer's preferred language
 - Ask clarifying questions to understand their needs
 - Present 2-3 offer options, let them choose
 - If they're very upset or have complex issues, offer to transfer to a specialist
 - Keep responses concise (2-4 sentences max)
 
-Start the conversation with: "${greeting}, thank you for calling. I understand you're considering making changes to your account. I'm here to help - can you tell me what's prompting your call today?"`;
+Start the conversation with: "Hello ${firstName}, thank you for calling. I understand you're considering making changes to your account. I'm here to help - can you tell me what's prompting your call today?"`;
+    }
   }
 
   async processMessage(sessionId, userMessage) {

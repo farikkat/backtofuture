@@ -32,18 +32,29 @@ router.post('/start', async (req, res) => {
       });
     }
     
+    // Create session - it will automatically use customer's preferred language
     const session = conversationManager.createSession(customerId, customerProfile);
     
+    // Get system prompt in the customer's preferred language
     const systemPrompt = conversationManager.getSystemPrompt(
       customerProfile, 
-      customerProfile.preferredLanguage || 'English'
+      session.language
     );
     
-    const greetingMatch = systemPrompt.match(/Start the conversation with: "(.+?)"/);
+    // Extract greeting from system prompt (works for both English and Spanish)
+    let greetingMatch = systemPrompt.match(/Start the conversation with: "(.+?)"/);
+    if (!greetingMatch) {
+      greetingMatch = systemPrompt.match(/Inicia la conversación con: "(.+?)"/);
+    }
+    
     const greeting = greetingMatch ? greetingMatch[1] : 
-      `Hello ${customerProfile.name.split(' ')[0]}, thank you for calling. How can I help you today?`;
+      (session.language === 'Spanish' 
+        ? `Hola ${customerProfile.firstName || customerProfile.name.split(' ')[0]}, gracias por llamar. ¿Cómo puedo ayudarle hoy?`
+        : `Hello ${customerProfile.firstName || customerProfile.name.split(' ')[0]}, thank you for calling. How can I help you today?`);
     
     await conversationManager.addMessage(session.sessionId, 'agent', greeting);
+    
+    console.log(`[API] Started conversation in ${session.language} for customer ${customerId}`);
     
     res.json({
       success: true,

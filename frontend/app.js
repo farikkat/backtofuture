@@ -174,14 +174,163 @@ async function handleCustomerSelect(e) {
  * Display customer information
  */
 function displayCustomerInfo(customer) {
-    document.getElementById('custName').textContent = customer.name;
-    document.getElementById('custPlan').textContent = customer.currentPlan;
-    document.getElementById('custBill').textContent = `$${customer.monthlyBill}`;
-    document.getElementById('custTenure').textContent = `${customer.tenure} months`;
-    document.getElementById('custStatus').textContent = customer.accountStatus.toUpperCase();
-    document.getElementById('custLTV').textContent = `$${customer.lifetimeValue.toFixed(2)}`;
+    const customerInfoDiv = document.getElementById('customerInfo');
     
-    document.getElementById('customerInfo').style.display = 'block';
+    // Build comprehensive customer profile HTML
+    let html = `
+        <!-- Section 1: Account Overview -->
+        <div class="info-section">
+            <h3 class="section-header">📋 Account Overview</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Customer Name</label>
+                    <span class="info-value">${customer.firstName} ${customer.lastName}</span>
+                </div>
+                <div class="info-item">
+                    <label>Account Number</label>
+                    <span class="info-value">${customer.accountNumber}</span>
+                </div>
+                <div class="info-item full-width">
+                    <label>Service Address</label>
+                    <span class="info-value">${customer.serviceAddress}</span>
+                </div>
+                <div class="info-item">
+                    <label>Customer Scope</label>
+                    <span class="info-value">${customer.customerScope}</span>
+                </div>
+                <div class="info-item">
+                    <label>Core Services</label>
+                    <span class="info-value">${customer.coreServices.join(', ')}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Service & Billing -->
+        <div class="info-section">
+            <h3 class="section-header">💳 Service & Billing</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Current Plan</label>
+                    <span class="info-value">${customer.currentPlanDetails.name}</span>
+                </div>
+                <div class="info-item">
+                    <label>Monthly Bill</label>
+                    <span class="info-value price">$${customer.currentPlanDetails.price.toFixed(2)}</span>
+                </div>
+                <div class="info-item full-width">
+                    <label>Value Added Services (VAS)</label>
+                    <div class="vas-badges">
+                        ${customer.vasServices.map(vas => `<span class="badge badge-vas">${vas}</span>`).join(' ')}
+                    </div>
+                </div>
+                ${customer.overdueBalance ? `
+                <div class="info-item full-width">
+                    <label>⚠️ Overdue Balance</label>
+                    <div class="overdue-warning">
+                        <span class="overdue-amount">$${customer.overdueBalance.amount.toFixed(2)}</span>
+                        <span class="overdue-aging">${customer.overdueBalance.aging}</span>
+                        <div class="overdue-message">${customer.overdueBalance.message}</div>
+                    </div>
+                </div>
+                ` : ''}
+                <div class="info-item">
+                    <label>AutoPay Status</label>
+                    <span class="badge ${customer.autoPayStatus.enrolled ? 'badge-success' : 'badge-warning'}">
+                        ${customer.autoPayStatus.enrolled ? '✓ Enrolled' : '✗ Not Enrolled'}
+                    </span>
+                    <div class="info-note">${customer.autoPayStatus.message}</div>
+                </div>
+                <div class="info-item">
+                    <label>E-Bill Status</label>
+                    <span class="badge ${customer.eBillStatus.enrolled ? 'badge-success' : 'badge-warning'}">
+                        ${customer.eBillStatus.enrolled ? '✓ Enrolled' : '✗ Not Enrolled'}
+                    </span>
+                    <div class="info-note">${customer.eBillStatus.message}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Account Health -->
+        <div class="info-section">
+            <h3 class="section-header">💪 Account Health</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Customer Tenure</label>
+                    <span class="info-value">${customer.customerTenure.years} year${customer.customerTenure.years !== 1 ? 's' : ''} ${customer.customerTenure.months} month${customer.customerTenure.months !== 1 ? 's' : ''}</span>
+                    <div class="info-note tenure-note">${customer.customerTenure.message}</div>
+                </div>
+                <div class="info-item">
+                    <label>Lifetime Value</label>
+                    <span class="info-value price">$${customer.lifetimeValue.toFixed(2)}</span>
+                </div>
+                <div class="info-item">
+                    <label>Account Status</label>
+                    <span class="badge ${customer.accountStatus === 'vip' ? 'badge-vip' : 'badge-success'}">${customer.accountStatus.toUpperCase()}</span>
+                </div>
+                <div class="info-item">
+                    <label>Payment History</label>
+                    <span class="badge ${
+                        customer.paymentHistory === 'excellent' ? 'badge-success' :
+                        customer.paymentHistory === 'good' ? 'badge-info' :
+                        'badge-warning'
+                    }">${customer.paymentHistory.toUpperCase()}</span>
+                </div>
+                <div class="info-item full-width">
+                    <label>Upsell Eligibility</label>
+                    <span class="badge ${customer.upsellEligibility.eligible ? 'badge-success' : 'badge-danger'}">
+                        ${customer.upsellEligibility.eligible ? '✓ Eligible' : '✗ Not Eligible'}
+                    </span>
+                    <div class="info-note">${customer.upsellEligibility.reason}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Recent Activity -->
+        <div class="info-section">
+            <h3 class="section-header">📊 Recent Activity</h3>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Trouble Tickets</label>
+                    <span class="badge ${customer.recentTroubleTickets.count === 0 ? 'badge-success' : 'badge-warning'}">
+                        ${customer.recentTroubleTickets.count} Ticket${customer.recentTroubleTickets.count !== 1 ? 's' : ''}
+                    </span>
+                    <div class="info-note">${customer.recentTroubleTickets.message}</div>
+                </div>
+                <div class="info-item">
+                    <label>Last Contact</label>
+                    <span class="info-value">${formatDate(customer.lastContactDate)}</span>
+                </div>
+                <div class="info-item">
+                    <label>Total Interactions</label>
+                    <span class="info-value">${customer.totalInteractions}</span>
+                </div>
+                <div class="info-item">
+                    <label>Preferred Language</label>
+                    <span class="badge badge-info">${customer.preferredLanguage}</span>
+                </div>
+                ${customer.openOrders.length > 0 ? `
+                <div class="info-item full-width">
+                    <label>Open Orders</label>
+                    <ul class="open-orders-list">
+                        ${customer.openOrders.map(order => `<li>${order}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    customerInfoDiv.innerHTML = html;
+    customerInfoDiv.style.display = 'block';
+}
+
+/**
+ * Format date string to readable format
+ */
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
 }
 
 /**
