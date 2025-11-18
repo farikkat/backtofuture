@@ -331,7 +331,13 @@ curl http://localhost:3001/api/customer/scenarios/list
 
 ## 📚 Documentation
 
+### 📖 Wiki Documentation
+- **[Wiki Pages](wiki/)** - Complete wiki-ready documentation for easy import
+- **[Wiki Import Guide](wiki/WIKI-IMPORT-GUIDE.md)** - How to import into GitHub Wiki, Confluence, Notion, etc.
+
 ### Core Documentation
+- **[Architecture Documentation](ARCHITECTURE.md)** - System architecture, data flow, component diagrams
+- **[Architecture Diagrams (Mermaid)](ARCHITECTURE-MERMAID.md)** - Interactive visual diagrams (11 diagrams)
 - **[Backend API Documentation](backend/README.md)** - API endpoints, integration guide
 - **[Frontend Demo Documentation](frontend/README.md)** - UI features, configuration
 
