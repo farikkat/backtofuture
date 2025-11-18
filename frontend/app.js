@@ -11,6 +11,11 @@ let transcriptionMethod = 'webspeech'; // 'webspeech' or 'backend'
 let speechRecognition = null;
 let recognitionSupported = false;
 
+// Customer search state
+let allCustomers = [];
+let filteredCustomers = [];
+let selectedSearchIndex = -1;
+
 // API helper function
 function getApiUrl(endpoint) {
     const apiUrl = window.APP_CONFIG?.API_URL || 'http://localhost:3001';
@@ -32,11 +37,21 @@ document.addEventListener('DOMContentLoaded', async () => {
  */
 async function loadCustomerScenarios() {
     try {
-        const response = await fetch(getApiUrl('/api/customer/scenarios/list'));
-        const data = await response.json();
+        // Load scenarios for dropdown
+        const scenariosResponse = await fetch(getApiUrl('/api/customer/scenarios/list'));
+        const scenariosData = await scenariosResponse.json();
         
-        if (data.success) {
-            populateCustomerSelect(data.scenarios);
+        if (scenariosData.success) {
+            populateCustomerSelect(scenariosData.scenarios);
+        }
+        
+        // Load all customers for search
+        const customersResponse = await fetch(getApiUrl('/api/customer/list'));
+        const customersData = await customersResponse.json();
+        
+        if (customersData.success) {
+            allCustomers = customersData.customers;
+            console.log(`Loaded ${allCustomers.length} customers for search`);
         }
     } catch (error) {
         console.error('Failed to load scenarios:', error);
@@ -76,6 +91,28 @@ function setupEventListeners() {
     document.getElementById('sendBtn').addEventListener('click', sendMessage);
     document.getElementById('voiceBtn').addEventListener('click', toggleVoiceRecording);
     document.getElementById('transcriptionMethod').addEventListener('change', handleTranscriptionMethodChange);
+    
+    // Customer search event listeners
+    const searchInput = document.getElementById('customerSearch');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const searchResults = document.getElementById('searchResults');
+    
+    searchInput.addEventListener('input', handleSearchInput);
+    searchInput.addEventListener('keydown', handleSearchKeydown);
+    searchInput.addEventListener('focus', () => {
+        if (searchInput.value.trim()) {
+            searchResults.style.display = 'block';
+        }
+    });
+    
+    clearSearchBtn.addEventListener('click', clearSearch);
+    
+    // Close search results when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
 }
 
 /**
@@ -1096,6 +1133,210 @@ function checkBrowserSupport() {
     if (!features.speechSynthesis) {
         console.warn('Text-to-speech not supported in this browser');
     }
+}
+
+/**
+ * Customer Search Functions
+ */
+
+/**
+ * Handle search input with type-ahead
+ */
+function handleSearchInput(e) {
+    const searchTerm = e.target.value.trim();
+    const clearBtn = document.getElementById('clearSearchBtn');
+    const searchResults = document.getElementById('searchResults');
+    
+    // Show/hide clear button
+    clearBtn.style.display = searchTerm ? 'block' : 'none';
+    
+    if (!searchTerm) {
+        searchResults.style.display = 'none';
+        filteredCustomers = [];
+        selectedSearchIndex = -1;
+        return;
+    }
+    
+    // Filter customers
+    filteredCustomers = filterCustomers(searchTerm);
+    
+    // Display results
+    displaySearchResults(filteredCustomers, searchTerm);
+    searchResults.style.display = filteredCustomers.length > 0 ? 'block' : 'block'; // Always show to display "no results"
+    selectedSearchIndex = -1; // Reset keyboard selection
+}
+
+/**
+ * Filter customers by search term
+ */
+function filterCustomers(searchTerm) {
+    const term = searchTerm.toLowerCase();
+    
+    return allCustomers.filter(customer => {
+        const firstName = (customer.firstName || '').toLowerCase();
+        const lastName = (customer.lastName || '').toLowerCase();
+        const fullName = `${firstName} ${lastName}`;
+        const accountNumber = (customer.accountNumber || '').toLowerCase();
+        const email = (customer.email || '').toLowerCase();
+        
+        return fullName.includes(term) || 
+               accountNumber.includes(term) || 
+               email.includes(term);
+    }).slice(0, 10); // Limit to 10 results
+}
+
+/**
+ * Display search results with highlighting
+ */
+function displaySearchResults(customers, searchTerm) {
+    const searchResults = document.getElementById('searchResults');
+    
+    if (customers.length === 0) {
+        searchResults.innerHTML = '<div class="search-no-results">No customers found</div>';
+        return;
+    }
+    
+    const resultsHTML = customers.map((customer, index) => {
+        const fullName = `${customer.firstName} ${customer.lastName}`;
+        const highlightedName = highlightMatch(fullName, searchTerm);
+        const highlightedAccount = highlightMatch(customer.accountNumber, searchTerm);
+        const plan = customer.currentPlanDetails?.name || customer.currentPlan || 'N/A';
+        const bill = customer.currentPlanDetails?.price || customer.monthlyBill || 0;
+        
+        return `
+            <div class="search-result-item" data-customer-id="${customer.customerId}" data-index="${index}">
+                <div class="search-result-main">
+                    <div class="search-result-name">${highlightedName}</div>
+                    <div class="search-result-details">${plan}</div>
+                </div>
+                <div class="search-result-meta">
+                    <div class="search-result-account">${highlightedAccount}</div>
+                    <div class="search-result-plan">$${bill.toFixed(2)}/mo</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    searchResults.innerHTML = resultsHTML;
+    
+    // Add click event listeners
+    searchResults.querySelectorAll('.search-result-item').forEach(item => {
+        item.addEventListener('click', () => selectSearchResult(item.dataset.customerId));
+    });
+}
+
+/**
+ * Highlight matching text
+ */
+function highlightMatch(text, searchTerm) {
+    if (!text || !searchTerm) return text;
+    
+    const regex = new RegExp(`(${escapeRegex(searchTerm)})`, 'gi');
+    return text.replace(regex, '<span class="search-highlight">$1</span>');
+}
+
+/**
+ * Escape regex special characters
+ */
+function escapeRegex(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
+ * Handle keyboard navigation in search results
+ */
+function handleSearchKeydown(e) {
+    const searchResults = document.getElementById('searchResults');
+    
+    if (searchResults.style.display === 'none' || filteredCustomers.length === 0) {
+        return;
+    }
+    
+    const items = searchResults.querySelectorAll('.search-result-item');
+    
+    switch (e.key) {
+        case 'ArrowDown':
+            e.preventDefault();
+            selectedSearchIndex = Math.min(selectedSearchIndex + 1, items.length - 1);
+            updateSearchSelection(items);
+            break;
+            
+        case 'ArrowUp':
+            e.preventDefault();
+            selectedSearchIndex = Math.max(selectedSearchIndex - 1, -1);
+            updateSearchSelection(items);
+            break;
+            
+        case 'Enter':
+            e.preventDefault();
+            if (selectedSearchIndex >= 0 && items[selectedSearchIndex]) {
+                const customerId = items[selectedSearchIndex].dataset.customerId;
+                selectSearchResult(customerId);
+            }
+            break;
+            
+        case 'Escape':
+            searchResults.style.display = 'none';
+            selectedSearchIndex = -1;
+            break;
+    }
+}
+
+/**
+ * Update visual selection in search results
+ */
+function updateSearchSelection(items) {
+    items.forEach((item, index) => {
+        if (index === selectedSearchIndex) {
+            item.classList.add('active');
+            item.scrollIntoView({ block: 'nearest' });
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+/**
+ * Select a customer from search results
+ */
+async function selectSearchResult(customerId) {
+    try {
+        const response = await fetch(getApiUrl(`/api/customer/${customerId}`));
+        const data = await response.json();
+        
+        if (data.success) {
+            currentCustomer = data.customer;
+            displayCustomerInfo(currentCustomer);
+            document.getElementById('startCallBtn').disabled = false;
+            
+            // Update dropdown to match selection
+            const select = document.getElementById('customerSelect');
+            select.value = customerId;
+            
+            // Clear and hide search
+            clearSearch();
+            
+            console.log(`Selected customer from search: ${currentCustomer.name}`);
+        }
+    } catch (error) {
+        console.error('Failed to load customer:', error);
+        showError('Failed to load customer data');
+    }
+}
+
+/**
+ * Clear search input and results
+ */
+function clearSearch() {
+    const searchInput = document.getElementById('customerSearch');
+    const searchResults = document.getElementById('searchResults');
+    const clearBtn = document.getElementById('clearSearchBtn');
+    
+    searchInput.value = '';
+    searchResults.style.display = 'none';
+    clearBtn.style.display = 'none';
+    filteredCustomers = [];
+    selectedSearchIndex = -1;
 }
 
 // Make functions available globally for modal

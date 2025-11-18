@@ -26,3 +26,8 @@ SESSION_TIMEOUT_MINUTES=30
 # CORS - Frontend URL
 FRONTEND_URL=http://localhost:3000
 
+# MongoDB Configuration
+# For local MongoDB: mongodb://localhost:27017/retention-agent
+# For MongoDB Atlas: mongodb+srv://username:password@cluster.mongodb.net/retention-agent
+MONGODB_URI=mongodb://localhost:27017/retention-agent
+

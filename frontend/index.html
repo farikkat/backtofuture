@@ -21,10 +21,36 @@
             <!-- Left Panel: Customer Selection & Info -->
             <aside class="left-panel">
                 <div class="panel-section">
-                    <h2>Demo Scenario</h2>
+                    <h2>Customer Selection</h2>
+                    
+                    <!-- Search with Type-Ahead -->
+                    <div class="search-container">
+                        <div class="search-input-wrapper">
+                            <span class="search-icon">🔍</span>
+                            <input 
+                                type="text" 
+                                id="customerSearch" 
+                                class="customer-search" 
+                                placeholder="Search by name or account #..."
+                                autocomplete="off"
+                            />
+                            <button id="clearSearchBtn" class="clear-search-btn" style="display: none;">✕</button>
+                        </div>
+                        <div id="searchResults" class="search-results" style="display: none;">
+                            <!-- Type-ahead results will appear here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Or Separator -->
+                    <div class="search-separator">
+                        <span>or browse all</span>
+                    </div>
+                    
+                    <!-- Traditional Dropdown -->
                     <select id="customerSelect" class="customer-select">
                         <option value="">Select a customer...</option>
                     </select>
+                    
                     <button id="startCallBtn" class="btn btn-primary" disabled>
                         📞 Start Call
                     </button>

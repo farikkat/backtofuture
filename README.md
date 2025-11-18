@@ -28,7 +28,30 @@ backtofuture/
 
 ## 🚀 Quick Start
 
-### 1. Start Backend API
+### 1. Start MongoDB (Optional but Recommended)
+
+```bash
+# Windows
+net start MongoDB
+
+# macOS/Linux
+sudo service mongod start
+```
+
+💡 **Don't have MongoDB?** No problem! The app works with mock data too.  
+📚 See [MongoDB Quick Start](MONGODB_QUICKSTART.md) for installation.
+
+### 2. Generate Customer Data (Optional)
+
+```bash
+cd backend
+npm run seed  # Generates 200 diverse customers
+```
+
+💡 **Skip this step** to use 5 demo customers instead.  
+📚 See [Seed Quick Start](SEED_QUICKSTART.md) for details.
+
+### 3. Start Backend API
 
 ```bash
 cd backend
@@ -44,7 +67,7 @@ npm start
 
 Backend runs on: **http://localhost:3001**
 
-### 2. Start Frontend Demo
+### 4. Start Frontend Demo
 
 ```bash
 cd frontend
@@ -54,7 +77,7 @@ npm start
 
 Frontend runs on: **http://localhost:3000**
 
-### 3. Open Demo
+### 5. Open Demo
 
 Navigate to: **http://localhost:3000** in your browser
 
@@ -69,9 +92,12 @@ Navigate to: **http://localhost:3000** in your browser
 - 💼 **Smart Offers** - Personalized retention offers
 - 🔄 **Session Management** - Conversation history tracking
 - 📡 **RESTful API** - 12+ endpoints
+- 🗄️ **MongoDB Integration** - Persistent customer data storage
+- 🌱 **Seed Data Generator** - Generate 200+ realistic customers
 
 ### Frontend Demo
-- 🎭 **6 Demo Scenarios** - Pre-configured customer profiles
+- 🎭 **200+ Customer Profiles** - Diverse scenarios and demographics
+- 🌍 **Bilingual Support** - English & Spanish customers
 - 🎨 **Modern UI** - Real-time updates and animations
 - 🎤 **Voice Input** - Record and transcribe audio
 - 🔊 **Voice Output** - Text-to-speech responses
@@ -302,10 +328,21 @@ curl http://localhost:3001/api/customer/scenarios/list
 
 ## 📚 Documentation
 
+### Core Documentation
 - **[Backend API Documentation](backend/README.md)** - API endpoints, integration guide
 - **[Frontend Demo Documentation](frontend/README.md)** - UI features, configuration
-- **[Backend Setup Guide](backend/SETUP.md)** (if exists) - Detailed backend setup
-- **[Frontend Setup Guide](frontend/SETUP.md)** (if exists) - Detailed frontend setup
+
+### Database & Data
+- **[MongoDB Integration Guide](MONGODB_INTEGRATION.md)** - Complete MongoDB setup and usage
+- **[MongoDB Quick Start](MONGODB_QUICKSTART.md)** - Get MongoDB running in 5 minutes
+- **[Seed Data Guide](SEED_DATA_GUIDE.md)** - Generate 200+ customer accounts
+- **[Seed Quick Start](SEED_QUICKSTART.md)** - Generate customers in 30 seconds
+
+### Additional Guides
+- **[Enhanced Customer Profiles](ENHANCED_CUSTOMER_PROFILES.md)** - Customer insights and data structure
+- **[Spanish Language Support](SPANISH_LANGUAGE_SUPPORT.md)** - Bilingual agent capabilities
+- **[Recent Billing Events](RECENT_BILLING_EVENTS.md)** - Billing change tracking
+- **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Complete feature overview
 
 ---
 

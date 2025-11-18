@@ -1,375 +1,13 @@
 const express = require('express');
 const router = express.Router();
+const Customer = require('../models/Customer');
+const databaseService = require('../services/database-service');
+const { customersObject, customersArray } = require('../data/customer-data');
 
 /**
- * Mock Customer Database
- * In production, this would query a real CRM/database
+ * Check if MongoDB is available
  */
-const mockCustomers = {
-  'cust_001': {
-    customerId: 'cust_001',
-    firstName: 'John',
-    lastName: 'Smith',
-    name: 'John Smith',
-    email: 'john.smith@email.com',
-    phone: '+1-555-0101',
-    accountNumber: 'FTR-100234',
-    serviceAddress: '1234 Maple Street, Springfield, IL 62701',
-    customerScope: 'Telecom Residential',
-    coreServices: ['Broadband/FIBER', 'Voice'],
-    
-    // Customer Insights
-    customerTenure: {
-      years: 1,
-      months: 2,
-      totalMonths: 14,
-      message: 'Thank and reward tenure'
-    },
-    currentPlanDetails: {
-      name: 'Fiber 500 Internet',
-      price: 54.99,
-      productTypes: ['Broadband/FIBER']
-    },
-    vasServices: ['Total Shield', 'Frontier Provided eero', 'Whole-Home Wi-Fi'],
-    overdueBalance: null,
-    autoPayStatus: {
-      enrolled: true,
-      message: 'Payment friction is low—leverage this convenience as a loyalty anchor'
-    },
-    eBillStatus: {
-      enrolled: true,
-      message: 'Shows some digital engagement—good channel for reminders'
-    },
-    upsellEligibility: {
-      eligible: true,
-      reason: 'Good standing, eligible for upgrades'
-    },
-    recentTroubleTickets: {
-      count: 0,
-      message: 'Service appears stable and reliable'
-    },
-    lastContactDate: '2025-11-06',
-    totalInteractions: 2,
-    openOrders: [],
-    preferredLanguage: 'English',
-    recentBillingEvents: {
-      hasChanges: true,
-      message: 'Last month bill went up $5.00 due to promotional discount expiring',
-      changeAmount: 5.00,
-      changeType: 'increase'
-    },
-    
-    // Legacy fields (preserved for compatibility)
-    monthlyBill: 54.99,
-    currentPlan: 'Fiber 500 Internet',
-    tenure: 14,
-    paymentHistory: 'excellent',
-    accountStatus: 'active',
-    lifetimeValue: 769.86,
-    recentActivity: [
-      'Viewed competitor pricing online',
-      'Called support 2 weeks ago about pricing',
-      'Received promotional email'
-    ],
-    notes: 'Price-sensitive customer. High churn risk. Good payment history.'
-  },
-  
-  'cust_002': {
-    customerId: 'cust_002',
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    name: 'Sarah Johnson',
-    email: 'sarah.j@email.com',
-    phone: '+1-555-0202',
-    accountNumber: 'FTR-200456',
-    serviceAddress: '5678 Oak Avenue, Portland, OR 97201',
-    customerScope: 'Telecom Residential',
-    coreServices: ['Broadband/FIBER', 'Video', 'Voice'],
-    
-    // Customer Insights
-    customerTenure: {
-      years: 3,
-      months: 6,
-      totalMonths: 42,
-      message: 'Long-time valued customer—thank and reward loyalty'
-    },
-    currentPlanDetails: {
-      name: 'Fiber 1 Gig + TV Premium',
-      price: 89.99,
-      productTypes: ['Broadband/FIBER', 'Video']
-    },
-    vasServices: ['Total Shield', 'Frontier Provided eero', 'Whole-Home Wi-Fi', 'Premium Support'],
-    overdueBalance: null,
-    autoPayStatus: {
-      enrolled: true,
-      message: 'Payment friction is low—leverage this convenience as a loyalty anchor'
-    },
-    eBillStatus: {
-      enrolled: true,
-      message: 'Shows strong digital engagement—good channel for proactive outreach'
-    },
-    upsellEligibility: {
-      eligible: true,
-      reason: 'Excellent standing, prime candidate for premium services'
-    },
-    recentTroubleTickets: {
-      count: 0,
-      message: 'Service appears stable and reliable'
-    },
-    lastContactDate: '2025-10-28',
-    totalInteractions: 5,
-    openOrders: [],
-    preferredLanguage: 'English',
-    recentBillingEvents: {
-      hasChanges: false,
-      message: 'No recent changes',
-      changeAmount: 0,
-      changeType: 'none'
-    },
-    
-    // Legacy fields
-    monthlyBill: 89.99,
-    currentPlan: 'Fiber 1 Gig + TV Premium',
-    tenure: 42,
-    paymentHistory: 'excellent',
-    accountStatus: 'active',
-    lifetimeValue: 3779.58,
-    recentActivity: [
-      'Mentioned competitor offer in recent call',
-      'Increased data usage last month',
-      'Opened competitor advertising email'
-    ],
-    notes: 'Long-time customer. Competitor threat. High value account.'
-  },
-  
-  'cust_003': {
-    customerId: 'cust_003',
-    firstName: 'Robert',
-    lastName: 'Chen',
-    name: 'Robert Chen',
-    email: 'r.chen@email.com',
-    phone: '+1-555-0303',
-    accountNumber: 'FTR-300789',
-    serviceAddress: '9012 Business Parkway, San Jose, CA 95134',
-    customerScope: 'Telecom Residential',
-    coreServices: ['Broadband/FIBER', 'Video', 'Voice'],
-    
-    // Customer Insights
-    customerTenure: {
-      years: 5,
-      months: 7,
-      totalMonths: 67,
-      message: 'VIP customer—exceptional loyalty, premium treatment required'
-    },
-    currentPlanDetails: {
-      name: 'Business Fiber 2 Gig + TV Premium + Multi-line',
-      price: 199.99,
-      productTypes: ['Broadband/FIBER', 'Video', 'Voice']
-    },
-    vasServices: ['Total Shield Premium', 'Frontier Provided eero Pro', 'Whole-Home Wi-Fi', 'Unbreakable Wi-Fi', 'Priority Support', 'Static IP'],
-    overdueBalance: null,
-    autoPayStatus: {
-      enrolled: true,
-      message: 'VIP convenience—maintain white-glove service'
-    },
-    eBillStatus: {
-      enrolled: true,
-      message: 'Full digital engagement—preferred communication channel'
-    },
-    upsellEligibility: {
-      eligible: true,
-      reason: 'VIP status—eligible for exclusive premium offerings'
-    },
-    recentTroubleTickets: {
-      count: 0,
-      message: 'Service excellent—no issues reported'
-    },
-    lastContactDate: '2025-09-15',
-    totalInteractions: 12,
-    openOrders: [],
-    preferredLanguage: 'English',
-    recentBillingEvents: {
-      hasChanges: false,
-      message: 'No recent changes',
-      changeAmount: 0,
-      changeType: 'none'
-    },
-    
-    // Legacy fields
-    monthlyBill: 199.99,
-    currentPlan: 'Business Fiber 2 Gig + TV Premium + Multi-line',
-    tenure: 67,
-    paymentHistory: 'excellent',
-    accountStatus: 'vip',
-    lifetimeValue: 13399.33,
-    recentActivity: [
-      'VIP customer for 5+ years',
-      'Referred 2 customers this year',
-      'No service issues reported'
-    ],
-    notes: 'VIP customer. Extremely high value. Referral source. Premium treatment required.'
-  },
-  
-  'cust_004': {
-    customerId: 'cust_004',
-    firstName: 'Maria',
-    lastName: 'Garcia',
-    name: 'Maria Garcia',
-    email: 'maria.garcia@email.com',
-    phone: '+1-555-0404',
-    accountNumber: 'FTR-400112',
-    serviceAddress: '3456 Sunset Boulevard, Miami, FL 33101',
-    customerScope: 'Telecom Residential',
-    coreServices: ['Broadband/FIBER'],
-    
-    // Customer Insights
-    customerTenure: {
-      years: 0,
-      months: 8,
-      totalMonths: 8,
-      message: 'Newer customer—build relationship and trust'
-    },
-    currentPlanDetails: {
-      name: 'Fiber 300 Internet',
-      price: 74.99,
-      productTypes: ['Broadband/FIBER']
-    },
-    vasServices: ['Total Shield'],
-    overdueBalance: null,
-    autoPayStatus: {
-      enrolled: true,
-      message: 'Payment friction is low—maintain convenience'
-    },
-    eBillStatus: {
-      enrolled: false,
-      message: 'Paper bills—opportunity for digital enrollment'
-    },
-    upsellEligibility: {
-      eligible: false,
-      reason: 'Recent service issues—focus on resolution before upsell'
-    },
-    recentTroubleTickets: {
-      count: 3,
-      message: 'Service quality concerns—requires immediate attention'
-    },
-    lastContactDate: '2025-11-10',
-    totalInteractions: 6,
-    openOrders: ['Service ticket #ST-789456 - Connectivity issue'],
-    preferredLanguage: 'Spanish',
-    recentBillingEvents: {
-      hasChanges: true,
-      message: 'Last month bill went up $10.00 as customer added new VAS product (Total Shield)',
-      changeAmount: 10.00,
-      changeType: 'increase'
-    },
-    
-    // Legacy fields
-    monthlyBill: 74.99,
-    currentPlan: 'Fiber 300 Internet',
-    tenure: 8,
-    paymentHistory: 'good',
-    accountStatus: 'active',
-    lifetimeValue: 599.92,
-    recentActivity: [
-      'Reported connectivity issues 3 times this month',
-      'Service ticket open',
-      'Requested Spanish support'
-    ],
-    notes: 'Service quality issues. Spanish-speaking preferred. Newer customer at risk.'
-  },
-  
-  'cust_005': {
-    customerId: 'cust_005',
-    firstName: 'Jennifer',
-    lastName: 'Martinez',
-    name: 'Jennifer Martinez',
-    email: 'jen.martinez@email.com',
-    phone: '+1-555-0505',
-    accountNumber: 'FTR-500334',
-    serviceAddress: '7890 Pine Street, Austin, TX 78701',
-    customerScope: 'Telecom Residential',
-    coreServices: ['Broadband/FIBER', 'Video'],
-    
-    // Customer Insights
-    customerTenure: {
-      years: 2,
-      months: 0,
-      totalMonths: 24,
-      message: 'Two-year customer—appreciate loyalty despite recent challenges'
-    },
-    currentPlanDetails: {
-      name: 'Fiber 500 Internet + TV Select',
-      price: 109.99,
-      productTypes: ['Broadband/FIBER', 'Video']
-    },
-    vasServices: ['Frontier Provided eero', 'Whole-Home Wi-Fi'],
-    overdueBalance: {
-      amount: 98.19,
-      aging: '60 and 90 days',
-      message: 'Strong sign of financial distress or dissatisfaction; increases churn risk and blocks promotional eligibility'
-    },
-    autoPayStatus: {
-      enrolled: true,
-      message: 'AutoPay enabled but overdue balance exists—investigate payment failure'
-    },
-    eBillStatus: {
-      enrolled: true,
-      message: 'Digital engagement present—use for payment reminders'
-    },
-    upsellEligibility: {
-      eligible: false,
-      reason: 'Overdue balance blocks upgrades—focus retention & resolution, not new sales'
-    },
-    recentTroubleTickets: {
-      count: 0,
-      message: 'No service issues—billing is the primary concern'
-    },
-    lastContactDate: '2025-11-06',
-    totalInteractions: 4,
-    openOrders: [],
-    preferredLanguage: 'English',
-    recentBillingEvents: {
-      hasChanges: true,
-      message: 'Last month bill went up $19.99 due to loyalty credit expiring',
-      changeAmount: 19.99,
-      changeType: 'increase'
-    },
-    
-    // Legacy fields
-    monthlyBill: 109.99,
-    currentPlan: 'Fiber 500 Internet + TV Select',
-    tenure: 24,
-    paymentHistory: 'fair',
-    accountStatus: 'active',
-    lifetimeValue: 2639.76,
-    recentActivity: [
-      'Late payment last month',
-      'Disputed charge 2 months ago',
-      'Called billing department twice'
-    ],
-    notes: 'Billing concerns. Some payment delays. Needs financial empathy.'
-  },
-  
-  'cust_demo': {
-    customerId: 'cust_demo',
-    name: 'Demo Customer',
-    email: 'demo@example.com',
-    phone: '+1-555-DEMO',
-    monthlyBill: 99.99,
-    currentPlan: 'Internet 500 Mbps + TV Standard',
-    tenure: 12,
-    paymentHistory: 'excellent',
-    accountStatus: 'active',
-    lifetimeValue: 1199.88,
-    recentActivity: [
-      'Demo account for testing',
-      'All features enabled',
-      'Flexible scenario'
-    ],
-    notes: 'General demo account. Use for flexible testing and demonstrations.',
-    preferredLanguage: 'English'
-  }
-};
+let useDatabase = false;
 
 /**
  * Customer scenarios for demo dropdown
@@ -414,16 +52,42 @@ const customerScenarios = [
     description: 'Payment concerns and disputed charges',
     difficulty: 'Medium',
     icon: '💳'
-  },
-  {
-    id: 'cust_demo',
-    name: 'Demo Customer',
-    scenario: 'General Testing',
-    description: 'Flexible demo account for any scenario',
-    difficulty: 'Flexible',
-    icon: '🔧'
   }
 ];
+
+/**
+ * Initialize database connection and populate if empty
+ */
+async function initializeDatabase() {
+  try {
+    const connected = await databaseService.connect();
+    
+    if (connected) {
+      useDatabase = true;
+      console.log('[Customer API] Using MongoDB for customer data');
+      
+      // Check if we need to populate the database
+      const count = await Customer.countDocuments();
+      if (count === 0) {
+        console.log('[Customer API] Database empty, populating with initial data...');
+        await Customer.insertMany(customersArray);
+        console.log(`[Customer API] ✓ Populated database with ${customersArray.length} customers`);
+      } else {
+        console.log(`[Customer API] Database contains ${count} customers`);
+      }
+    } else {
+      useDatabase = false;
+      console.log('[Customer API] Using mock data (MongoDB unavailable)');
+    }
+  } catch (error) {
+    useDatabase = false;
+    console.error('[Customer API] Database initialization failed:', error.message);
+    console.log('[Customer API] Falling back to mock data');
+  }
+}
+
+// Initialize database on module load
+initializeDatabase();
 
 /**
  * GET /api/customer/scenarios/list
@@ -432,48 +96,395 @@ const customerScenarios = [
 router.get('/scenarios/list', (req, res) => {
   res.json({
     success: true,
-    scenarios: customerScenarios
+    scenarios: customerScenarios,
+    dataSource: useDatabase ? 'mongodb' : 'mock'
   });
+});
+
+/**
+ * GET /api/customer/health
+ * Database health check endpoint
+ */
+router.get('/health', async (req, res) => {
+  try {
+    const health = await databaseService.healthCheck();
+    const status = useDatabase ? await databaseService.getConnectionStatus() : null;
+    
+    res.json({
+      success: true,
+      database: {
+        enabled: useDatabase,
+        ...health,
+        ...status
+      }
+    });
+  } catch (error) {
+    res.json({
+      success: true,
+      database: {
+        enabled: false,
+        message: 'Using mock data',
+        error: error.message
+      }
+    });
+  }
+});
+
+/**
+ * GET /api/customer/list
+ * List all customers with full details for search
+ * IMPORTANT: This must come BEFORE /:customerId route
+ */
+router.get('/list', async (req, res) => {
+  try {
+    let customers;
+    
+    if (useDatabase) {
+      // Get from MongoDB with fields needed for search
+      customers = await Customer.find({}, {
+        customerId: 1,
+        firstName: 1,
+        lastName: 1,
+        name: 1,
+        email: 1,
+        accountNumber: 1,
+        currentPlanDetails: 1,
+        currentPlan: 1,
+        monthlyBill: 1,
+        tenure: 1,
+        accountStatus: 1,
+        preferredLanguage: 1
+      }).lean();
+    } else {
+      // Get from mock data with fields needed for search
+      customers = Object.values(customersObject).map(c => ({
+        customerId: c.customerId,
+        firstName: c.firstName,
+        lastName: c.lastName,
+        name: c.name,
+        email: c.email,
+        accountNumber: c.accountNumber,
+        currentPlanDetails: c.currentPlanDetails,
+        currentPlan: c.currentPlan,
+        monthlyBill: c.monthlyBill,
+        tenure: c.tenure,
+        accountStatus: c.accountStatus,
+        preferredLanguage: c.preferredLanguage
+      }));
+    }
+    
+    console.log(`[Customer API] Listed ${customers.length} customers for search`);
+    
+    res.json({
+      success: true,
+      customers,
+      count: customers.length,
+      dataSource: useDatabase ? 'mongodb' : 'mock'
+    });
+  } catch (error) {
+    console.error('[Customer API] List error:', error);
+    res.status(500).json({
+      error: 'Failed to retrieve customers',
+      message: error.message
+    });
+  }
 });
 
 /**
  * GET /api/customer
+ * List all customers
  * IMPORTANT: This must come BEFORE /:customerId route
  */
-router.get('/', (req, res) => {
-  res.json({
-    success: true,
-    customers: Object.values(mockCustomers).map(c => ({
-      customerId: c.customerId,
-      name: c.name,
-      monthlyBill: c.monthlyBill,
-      tenure: c.tenure,
-      accountStatus: c.accountStatus
-    }))
-  });
+router.get('/', async (req, res) => {
+  try {
+    let customers;
+    
+    if (useDatabase) {
+      // Get from MongoDB
+      customers = await Customer.find({}, {
+        customerId: 1,
+        name: 1,
+        monthlyBill: 1,
+        tenure: 1,
+        accountStatus: 1,
+        preferredLanguage: 1
+      }).lean();
+    } else {
+      // Get from mock data
+      customers = Object.values(customersObject).map(c => ({
+        customerId: c.customerId,
+        name: c.name,
+        monthlyBill: c.monthlyBill,
+        tenure: c.tenure,
+        accountStatus: c.accountStatus,
+        preferredLanguage: c.preferredLanguage
+      }));
+    }
+    
+    res.json({
+      success: true,
+      customers,
+      count: customers.length,
+      dataSource: useDatabase ? 'mongodb' : 'mock'
+    });
+  } catch (error) {
+    console.error('[Customer API] List error:', error);
+    res.status(500).json({
+      error: 'Failed to retrieve customers',
+      message: error.message
+    });
+  }
 });
 
 /**
  * GET /api/customer/:customerId
+ * Get a single customer by ID
  * IMPORTANT: This must come AFTER specific routes
  */
-router.get('/:customerId', (req, res) => {
-  const { customerId } = req.params;
-  
-  const customer = mockCustomers[customerId];
-  
-  if (!customer) {
-    return res.status(404).json({
-      error: 'Customer not found',
-      customerId
+router.get('/:customerId', async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    let customer;
+    
+    if (useDatabase) {
+      // Get from MongoDB
+      customer = await Customer.findOne({ customerId }).lean();
+    } else {
+      // Get from mock data
+      customer = customersObject[customerId];
+    }
+    
+    if (!customer) {
+      return res.status(404).json({
+        error: 'Customer not found',
+        customerId
+      });
+    }
+    
+    res.json({
+      success: true,
+      customer,
+      dataSource: useDatabase ? 'mongodb' : 'mock'
+    });
+  } catch (error) {
+    console.error('[Customer API] Get customer error:', error);
+    res.status(500).json({
+      error: 'Failed to retrieve customer',
+      message: error.message
     });
   }
-  
-  res.json({
-    success: true,
-    customer
-  });
+});
+
+/**
+ * POST /api/customer
+ * Create a new customer
+ */
+router.post('/', async (req, res) => {
+  try {
+    if (!useDatabase) {
+      return res.status(503).json({
+        error: 'Database not available',
+        message: 'Cannot create customers when using mock data'
+      });
+    }
+    
+    const customerData = req.body;
+    
+    // Check if customer already exists
+    const existing = await Customer.findOne({ customerId: customerData.customerId });
+    if (existing) {
+      return res.status(409).json({
+        error: 'Customer already exists',
+        customerId: customerData.customerId
+      });
+    }
+    
+    // Create new customer
+    const customer = new Customer(customerData);
+    await customer.save();
+    
+    console.log(`[Customer API] ✓ Created customer ${customer.customerId}`);
+    
+    res.status(201).json({
+      success: true,
+      customer: customer.toObject(),
+      message: 'Customer created successfully'
+    });
+  } catch (error) {
+    console.error('[Customer API] Create error:', error);
+    
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        error: 'Validation failed',
+        message: error.message,
+        details: error.errors
+      });
+    }
+    
+    res.status(500).json({
+      error: 'Failed to create customer',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * PUT /api/customer/:customerId
+ * Update an existing customer
+ */
+router.put('/:customerId', async (req, res) => {
+  try {
+    if (!useDatabase) {
+      return res.status(503).json({
+        error: 'Database not available',
+        message: 'Cannot update customers when using mock data'
+      });
+    }
+    
+    const { customerId } = req.params;
+    const updates = req.body;
+    
+    // Remove immutable fields
+    delete updates._id;
+    delete updates.customerId;
+    delete updates.createdAt;
+    
+    const customer = await Customer.findOneAndUpdate(
+      { customerId },
+      updates,
+      { new: true, runValidators: true }
+    );
+    
+    if (!customer) {
+      return res.status(404).json({
+        error: 'Customer not found',
+        customerId
+      });
+    }
+    
+    console.log(`[Customer API] ✓ Updated customer ${customerId}`);
+    
+    res.json({
+      success: true,
+      customer: customer.toObject(),
+      message: 'Customer updated successfully'
+    });
+  } catch (error) {
+    console.error('[Customer API] Update error:', error);
+    
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        error: 'Validation failed',
+        message: error.message,
+        details: error.errors
+      });
+    }
+    
+    res.status(500).json({
+      error: 'Failed to update customer',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * DELETE /api/customer/:customerId
+ * Delete a customer
+ */
+router.delete('/:customerId', async (req, res) => {
+  try {
+    if (!useDatabase) {
+      return res.status(503).json({
+        error: 'Database not available',
+        message: 'Cannot delete customers when using mock data'
+      });
+    }
+    
+    const { customerId } = req.params;
+    
+    const customer = await Customer.findOneAndDelete({ customerId });
+    
+    if (!customer) {
+      return res.status(404).json({
+        error: 'Customer not found',
+        customerId
+      });
+    }
+    
+    console.log(`[Customer API] ✓ Deleted customer ${customerId}`);
+    
+    res.json({
+      success: true,
+      message: 'Customer deleted successfully',
+      customerId
+    });
+  } catch (error) {
+    console.error('[Customer API] Delete error:', error);
+    res.status(500).json({
+      error: 'Failed to delete customer',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/customer/query/at-risk
+ * Find customers at risk
+ */
+router.get('/query/at-risk', async (req, res) => {
+  try {
+    if (!useDatabase) {
+      return res.status(503).json({
+        error: 'Query not available with mock data',
+        message: 'Advanced queries require database connection'
+      });
+    }
+    
+    const customers = await Customer.findAtRisk();
+    
+    res.json({
+      success: true,
+      customers,
+      count: customers.length,
+      dataSource: 'mongodb'
+    });
+  } catch (error) {
+    console.error('[Customer API] At-risk query error:', error);
+    res.status(500).json({
+      error: 'Failed to query at-risk customers',
+      message: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/customer/query/vip
+ * Find VIP customers
+ */
+router.get('/query/vip', async (req, res) => {
+  try {
+    if (!useDatabase) {
+      return res.status(503).json({
+        error: 'Query not available with mock data',
+        message: 'Advanced queries require database connection'
+      });
+    }
+    
+    const customers = await Customer.findVIP();
+    
+    res.json({
+      success: true,
+      customers,
+      count: customers.length,
+      dataSource: 'mongodb'
+    });
+  } catch (error) {
+    console.error('[Customer API] VIP query error:', error);
+    res.status(500).json({
+      error: 'Failed to query VIP customers',
+      message: error.message
+    });
+  }
 });
 
 module.exports = router;
-
