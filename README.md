@@ -103,6 +103,8 @@ Navigate to: **http://localhost:3000** in your browser
 - 🎨 **Modern UI** - Real-time updates and animations
 - 🎤 **Voice Input** - Record and transcribe audio
 - 🔊 **Voice Output** - Natural text-to-speech (e.g., "$29.99" → "twenty-nine ninety-nine")
+- 👩 **Female Voice Agents** - Exclusively professional female voices for warm, consistent service
+- ⚡ **Fast & Concise** - Agent speaks 30% faster with 60% fewer words for efficient service
 - 🔍 **Type-Ahead Search** - Fast customer search by name or account
 - 📈 **Live Analytics** - Intent/sentiment visualization
 - 📋 **Transfer Summaries** - Agent handoff reports
@@ -352,6 +354,8 @@ curl http://localhost:3001/api/customer/scenarios/list
 - **[Spanish Language Support](SPANISH_LANGUAGE_SUPPORT.md)** - Bilingual agent capabilities
 - **[Recent Billing Events](RECENT_BILLING_EVENTS.md)** - Billing change tracking
 - **[Movers Retention Flow](MOVERS_RETENTION_FLOW.md)** - Address verification & 1 Gig offers for relocating customers
+- **[Female Voice Agent Configuration](FEMALE_VOICE_AGENT.md)** - Exclusive female voice selection
+- **[Fast & Concise Agent Configuration](FAST_CONCISE_AGENT.md)** - Optimized for speed and efficiency
 - **[Speech Formatting Guide](SPEECH_FORMATTING.md)** - Natural TTS pronunciation of currency, dates, etc.
 - **[Speech Formatting Quick Start](SPEECH_FORMATTING_QUICKSTART.md)** - Get started with natural speech in 5 minutes
 - **[Customer Search Feature](CUSTOMER_SEARCH_FEATURE.md)** - Type-ahead search implementation

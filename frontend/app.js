@@ -1096,8 +1096,8 @@ function speak(text, language = 'English') {
     // Language settings
     utterance.lang = language === 'Spanish' ? 'es-US' : 'en-US';
     
-    // Natural, conversational settings
-    utterance.rate = 0.95;    // Slightly slower for warmth and clarity
+    // Fast, efficient settings for quick communication
+    utterance.rate = 1.25;    // Faster speech rate for efficiency
     utterance.pitch = 1.05;   // Slightly higher pitch for friendliness
     utterance.volume = 1.0;   // Full volume for clarity
     
@@ -1152,58 +1152,116 @@ function selectNaturalVoice(voices, language) {
     const isSpanish = language === 'Spanish';
     const lang = isSpanish ? 'es' : 'en';
     
-    // Priority list of natural-sounding voices
-    const preferredVoiceNames = isSpanish ? [
-        // Spanish - warm, natural voices
-        'Google español',
-        'Microsoft Helena',
-        'Paulina',
-        'Monica',
-        'Google español de Estados Unidos',
-        'Mónica',
-        'es-US',
-        'es-MX'
-    ] : [
-        // English - warm, natural, empathetic voices
-        'Google US English',
-        'Microsoft Zira',
-        'Samantha',           // macOS - very natural
-        'Karen',              // macOS - warm
-        'Moira',              // macOS - friendly
-        'Tessa',              // macOS - professional
-        'Microsoft Eva',      // Windows - natural
-        'Google UK English Female',
-        'en-US',
-        'en-GB'
+    // FEMALE VOICES ONLY - Filter out male voices
+    const maleVoiceKeywords = [
+        'male', 'man', 'jorge', 'diego', 'david', 'mark', 'james', 'alex male',
+        'daniel', 'thomas', 'fred', 'carlos', 'juan', 'fernando', 'masculine',
+        'boy', 'guy', 'diego', 'jorge', 'raul', 'daniel'
     ];
     
-    // Try to find preferred voices (typically female voices sound warmer for customer service)
-    for (const name of preferredVoiceNames) {
-        const voice = voices.find(v => 
-            v.name.toLowerCase().includes(name.toLowerCase()) ||
-            v.lang.startsWith(lang)
-        );
-        if (voice) return voice;
+    // Filter to only female voices for the target language
+    let femaleVoices = voices.filter(v => {
+        const voiceName = v.name.toLowerCase();
+        const isMale = maleVoiceKeywords.some(keyword => voiceName.includes(keyword));
+        const isTargetLang = v.lang.startsWith(lang);
+        return isTargetLang && !isMale;
+    });
+    
+    // If no female voices found for target language, try broader filter
+    if (femaleVoices.length === 0) {
+        femaleVoices = voices.filter(v => {
+            const voiceName = v.name.toLowerCase();
+            return !maleVoiceKeywords.some(keyword => voiceName.includes(keyword));
+        });
     }
     
-    // Fallback: prefer local voices and female voices for warmth
-    const localVoices = voices.filter(v => v.lang.startsWith(lang) && v.localService);
-    if (localVoices.length > 0) {
-        // Prefer female voices (typically have "female" in name or higher pitch characteristics)
-        const femaleVoice = localVoices.find(v => 
-            v.name.toLowerCase().includes('female') ||
-            v.name.toLowerCase().includes('woman') ||
-            // Common female voice names
-            ['samantha', 'karen', 'moira', 'tessa', 'zira', 'eva', 'helena'].some(name => 
-                v.name.toLowerCase().includes(name)
-            )
+    // Priority list of preferred FEMALE voices
+    const preferredFemaleVoices = isSpanish ? [
+        // Spanish - Female voices only
+        'Paulina',            // Very natural
+        'Monica',             // Warm
+        'Mónica',             // Warm (accented)
+        'Microsoft Helena',   // Professional
+        'Paloma',             // Natural
+        'Carmen',             // Friendly
+        'Lucia',              // Warm
+        'Google español',     // Usually female
+        'Google español de Estados Unidos',
+        'es-US Female',
+        'es-MX Female',
+        'es-ES Female'
+    ] : [
+        // English - Female voices only
+        'Samantha',           // macOS - very natural and warm
+        'Karen',              // macOS - warm and friendly
+        'Moira',              // macOS - professional
+        'Tessa',              // macOS - empathetic
+        'Microsoft Zira',     // Windows - natural female
+        'Microsoft Eva',      // Windows - professional female
+        'Google US English Female',
+        'Google UK English Female',
+        'Susan',              // macOS - clear
+        'Victoria',           // macOS - professional
+        'Fiona',              // macOS - Scottish accent
+        'Serena',             // Windows - friendly
+        'Heather',            // macOS - warm
+        'Allison',            // macOS - professional
+        'en-US Female',
+        'en-GB Female'
+    ];
+    
+    // Try to find preferred female voices in order
+    for (const name of preferredFemaleVoices) {
+        const voice = femaleVoices.find(v => 
+            v.name.toLowerCase().includes(name.toLowerCase())
         );
-        if (femaleVoice) return femaleVoice;
-        return localVoices[0];
+        if (voice) {
+            console.log(`✅ Selected female voice: ${voice.name} (${voice.lang})`);
+            return voice;
+        }
     }
     
-    // Last resort: any voice in the target language
-    return voices.find(v => v.lang.startsWith(lang)) || voices[0];
+    // Fallback 1: Female voices with "female" or "woman" explicitly in name
+    const explicitFemaleVoice = femaleVoices.find(v => 
+        v.name.toLowerCase().includes('female') ||
+        v.name.toLowerCase().includes('woman')
+    );
+    if (explicitFemaleVoice) {
+        console.log(`✅ Selected explicit female voice: ${explicitFemaleVoice.name}`);
+        return explicitFemaleVoice;
+    }
+    
+    // Fallback 2: Female voices with common female names
+    const commonFemaleNames = [
+        'samantha', 'karen', 'moira', 'tessa', 'zira', 'eva', 'helena',
+        'susan', 'victoria', 'fiona', 'serena', 'heather', 'allison',
+        'paulina', 'monica', 'lucia', 'carmen', 'paloma', 'maria'
+    ];
+    
+    const namedFemaleVoice = femaleVoices.find(v => 
+        commonFemaleNames.some(name => v.name.toLowerCase().includes(name))
+    );
+    if (namedFemaleVoice) {
+        console.log(`✅ Selected named female voice: ${namedFemaleVoice.name}`);
+        return namedFemaleVoice;
+    }
+    
+    // Fallback 3: Local female voices (better quality)
+    const localFemaleVoices = femaleVoices.filter(v => v.localService);
+    if (localFemaleVoices.length > 0) {
+        console.log(`✅ Selected local female voice: ${localFemaleVoices[0].name}`);
+        return localFemaleVoices[0];
+    }
+    
+    // Fallback 4: Any female voice available
+    if (femaleVoices.length > 0) {
+        console.log(`✅ Selected fallback female voice: ${femaleVoices[0].name}`);
+        return femaleVoices[0];
+    }
+    
+    // Last resort: Use any available voice (shouldn't happen but for safety)
+    console.warn('⚠️ No female voices found, using first available voice');
+    return voices[0];
 }
 
 /**
