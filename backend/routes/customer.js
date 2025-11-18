@@ -52,6 +52,12 @@ const mockCustomers = {
     totalInteractions: 2,
     openOrders: [],
     preferredLanguage: 'English',
+    recentBillingEvents: {
+      hasChanges: true,
+      message: 'Last month bill went up $5.00 due to promotional discount expiring',
+      changeAmount: 5.00,
+      changeType: 'increase'
+    },
     
     // Legacy fields (preserved for compatibility)
     monthlyBill: 54.99,
@@ -114,6 +120,12 @@ const mockCustomers = {
     totalInteractions: 5,
     openOrders: [],
     preferredLanguage: 'English',
+    recentBillingEvents: {
+      hasChanges: false,
+      message: 'No recent changes',
+      changeAmount: 0,
+      changeType: 'none'
+    },
     
     // Legacy fields
     monthlyBill: 89.99,
@@ -176,6 +188,12 @@ const mockCustomers = {
     totalInteractions: 12,
     openOrders: [],
     preferredLanguage: 'English',
+    recentBillingEvents: {
+      hasChanges: false,
+      message: 'No recent changes',
+      changeAmount: 0,
+      changeType: 'none'
+    },
     
     // Legacy fields
     monthlyBill: 199.99,
@@ -238,6 +256,12 @@ const mockCustomers = {
     totalInteractions: 6,
     openOrders: ['Service ticket #ST-789456 - Connectivity issue'],
     preferredLanguage: 'Spanish',
+    recentBillingEvents: {
+      hasChanges: true,
+      message: 'Last month bill went up $10.00 as customer added new VAS product (Total Shield)',
+      changeAmount: 10.00,
+      changeType: 'increase'
+    },
     
     // Legacy fields
     monthlyBill: 74.99,
@@ -304,6 +328,12 @@ const mockCustomers = {
     totalInteractions: 4,
     openOrders: [],
     preferredLanguage: 'English',
+    recentBillingEvents: {
+      hasChanges: true,
+      message: 'Last month bill went up $19.99 due to loyalty credit expiring',
+      changeAmount: 19.99,
+      changeType: 'increase'
+    },
     
     // Legacy fields
     monthlyBill: 109.99,

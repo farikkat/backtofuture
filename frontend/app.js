@@ -247,6 +247,23 @@ function displayCustomerInfo(customer) {
                     </span>
                     <div class="info-note">${customer.eBillStatus.message}</div>
                 </div>
+                ${customer.recentBillingEvents ? `
+                <div class="info-item full-width">
+                    <label>Recent Billing Events</label>
+                    <div class="billing-events ${customer.recentBillingEvents.hasChanges ? 'has-changes' : 'no-changes'}">
+                        ${customer.recentBillingEvents.hasChanges && customer.recentBillingEvents.changeType === 'increase' ? 
+                            `<span class="billing-icon">📈</span>` : 
+                            `<span class="billing-icon">✅</span>`
+                        }
+                        <span class="billing-message">${customer.recentBillingEvents.message}</span>
+                        ${customer.recentBillingEvents.changeAmount > 0 ? 
+                            `<span class="billing-amount ${customer.recentBillingEvents.changeType === 'increase' ? 'increase' : 'decrease'}">
+                                ${customer.recentBillingEvents.changeType === 'increase' ? '+' : '-'}$${customer.recentBillingEvents.changeAmount.toFixed(2)}
+                            </span>` : ''
+                        }
+                    </div>
+                </div>
+                ` : ''}
             </div>
         </div>
 
