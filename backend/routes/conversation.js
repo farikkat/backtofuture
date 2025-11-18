@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const conversationManager = require('../services/conversation-manager');
 const databricksService = require('../services/databricks-service');
+const { formatForSpeech } = require('../utils/speech-formatter');
 
 // Configure multer for audio file uploads
 const upload = multer({
@@ -54,12 +55,16 @@ router.post('/start', async (req, res) => {
     
     await conversationManager.addMessage(session.sessionId, 'agent', greeting);
     
+    // Format greeting for natural speech (e.g., "$29.99" → "twenty-nine ninety-nine")
+    const speechText = formatForSpeech(greeting, { currencyStyle: 'casual' });
+    
     console.log(`[API] Started conversation in ${session.language} for customer ${customerId}`);
     
     res.json({
       success: true,
       sessionId: session.sessionId,
       greeting,
+      speechText, // Formatted version for TTS
       session: {
         customerId: session.customerId,
         customerName: session.customerProfile.name,
@@ -91,10 +96,14 @@ router.post('/message', async (req, res) => {
     
     const response = await conversationManager.processMessage(sessionId, message);
     
+    // Format response for natural speech (e.g., "$29.99" → "twenty-nine ninety-nine")
+    const speechText = formatForSpeech(response.message, { currencyStyle: 'casual' });
+    
     res.json({
       success: true,
       response: {
         message: response.message,
+        speechText, // Formatted version for TTS
         intent: response.intent,
         sentiment: response.sentiment,
         urgency: response.urgency,

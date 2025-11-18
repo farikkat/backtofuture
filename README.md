@@ -94,13 +94,15 @@ Navigate to: **http://localhost:3000** in your browser
 - 📡 **RESTful API** - 12+ endpoints
 - 🗄️ **MongoDB Integration** - Persistent customer data storage
 - 🌱 **Seed Data Generator** - Generate 200+ realistic customers
+- 🎙️ **Speech Formatting** - Natural pronunciation of currency, dates, percentages
 
 ### Frontend Demo
 - 🎭 **200+ Customer Profiles** - Diverse scenarios and demographics
 - 🌍 **Bilingual Support** - English & Spanish customers
 - 🎨 **Modern UI** - Real-time updates and animations
 - 🎤 **Voice Input** - Record and transcribe audio
-- 🔊 **Voice Output** - Text-to-speech responses
+- 🔊 **Voice Output** - Natural text-to-speech (e.g., "$29.99" → "twenty-nine ninety-nine")
+- 🔍 **Type-Ahead Search** - Fast customer search by name or account
 - 📈 **Live Analytics** - Intent/sentiment visualization
 - 📋 **Transfer Summaries** - Agent handoff reports
 
@@ -342,6 +344,10 @@ curl http://localhost:3001/api/customer/scenarios/list
 - **[Enhanced Customer Profiles](ENHANCED_CUSTOMER_PROFILES.md)** - Customer insights and data structure
 - **[Spanish Language Support](SPANISH_LANGUAGE_SUPPORT.md)** - Bilingual agent capabilities
 - **[Recent Billing Events](RECENT_BILLING_EVENTS.md)** - Billing change tracking
+- **[Speech Formatting Guide](SPEECH_FORMATTING.md)** - Natural TTS pronunciation of currency, dates, etc.
+- **[Speech Formatting Quick Start](SPEECH_FORMATTING_QUICKSTART.md)** - Get started with natural speech in 5 minutes
+- **[Customer Search Feature](CUSTOMER_SEARCH_FEATURE.md)** - Type-ahead search implementation
+- **[Enhanced Agent Context](ENHANCED_AGENT_CONTEXT.md)** - AI agent customer insights
 - **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Complete feature overview
 
 ---

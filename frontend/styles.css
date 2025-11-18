@@ -948,6 +948,21 @@ body {
     color: #667eea;
 }
 
+.info-value.pin-display {
+    font-family: 'Courier New', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 8px 16px;
+    border-radius: 8px;
+    letter-spacing: 4px;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    text-align: center;
+    min-width: 100px;
+}
+
 .info-note {
     font-size: 0.85rem;
     color: #666;

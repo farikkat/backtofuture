@@ -237,6 +237,73 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * POST /api/customer/verify-pin
+ * Verify PIN for a customer account
+ */
+router.post('/verify-pin', async (req, res) => {
+  try {
+    const { accountNumber, pin } = req.body;
+    
+    if (!accountNumber || !pin) {
+      return res.status(400).json({
+        error: 'Account number and PIN are required'
+      });
+    }
+    
+    let customer;
+    
+    if (useDatabase) {
+      // Get from MongoDB
+      customer = await Customer.findOne({ accountNumber }).lean();
+    } else {
+      // Get from mock data
+      customer = Object.values(customersObject).find(c => c.accountNumber === accountNumber);
+    }
+    
+    if (!customer) {
+      console.log(`[Customer API] Account not found: ${accountNumber}`);
+      return res.status(404).json({
+        success: false,
+        verified: false,
+        error: 'Account not found'
+      });
+    }
+    
+    // Verify PIN
+    const pinMatches = customer.pin === pin;
+    
+    if (pinMatches) {
+      console.log(`[Customer API] PIN verified for account: ${accountNumber}`);
+      return res.json({
+        success: true,
+        verified: true,
+        customer: {
+          customerId: customer.customerId,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          name: customer.name,
+          email: customer.email,
+          accountNumber: customer.accountNumber
+        }
+      });
+    } else {
+      console.log(`[Customer API] PIN verification failed for account: ${accountNumber}`);
+      return res.status(401).json({
+        success: false,
+        verified: false,
+        error: 'Invalid PIN'
+      });
+    }
+  } catch (error) {
+    console.error('[Customer API] PIN verification error:', error);
+    res.status(500).json({
+      error: 'Failed to verify PIN',
+      message: error.message
+    });
+  }
+});
+
+/**
  * GET /api/customer/:customerId
  * Get a single customer by ID
  * IMPORTANT: This must come AFTER specific routes

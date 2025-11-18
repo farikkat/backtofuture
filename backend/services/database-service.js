@@ -14,7 +14,7 @@ class DatabaseService {
       return true;
     }
 
-    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://admin:sewr3434fedgsdr2WEWds@ftr-mongodb.agentsmp.com:27019';
     
     try {
       await mongoose.connect(mongoUri, {

@@ -179,6 +179,13 @@ function generateAccountNumber(index) {
   return `FTR-${String(index).padStart(6, '0')}`;
 }
 
+/**
+ * Generate a random 4-digit PIN
+ */
+function generatePIN() {
+  return String(randomInt(1000, 9999));
+}
+
 function generateAddress(index) {
   const streetNumber = randomInt(100, 9999);
   const city = randomChoice(cities);
@@ -432,6 +439,7 @@ function generateCustomer(index) {
     email: generateEmail(firstName, lastName),
     phone: generatePhone(),
     accountNumber: generateAccountNumber(index + 100000),
+    pin: generatePIN(),
     serviceAddress: generateAddress(index),
     customerScope: 'Telecom Residential',
     coreServices: plan.services,

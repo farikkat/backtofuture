@@ -37,6 +37,13 @@ const customerSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  pin: {
+    type: String,
+    required: true,
+    minlength: 4,
+    maxlength: 4,
+    match: /^\d{4}$/
+  },
   serviceAddress: {
     type: String,
     required: true

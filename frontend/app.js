@@ -26,6 +26,9 @@ function getApiUrl(endpoint) {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('AI Voice Retention Agent - Initializing...');
     
+    // Preload voices for natural speech
+    preloadVoices();
+    
     await loadCustomerScenarios();
     setupEventListeners();
     initializeTranscription();
@@ -227,6 +230,10 @@ function displayCustomerInfo(customer) {
                     <label>Account Number</label>
                     <span class="info-value">${customer.accountNumber}</span>
                 </div>
+                <div class="info-item">
+                    <label>🔐 Account PIN</label>
+                    <span class="info-value pin-display">${customer.pin || 'N/A'}</span>
+                </div>
                 <div class="info-item full-width">
                     <label>Service Address</label>
                     <span class="info-value">${customer.serviceAddress}</span>
@@ -426,7 +433,8 @@ async function startCall() {
             document.getElementById('conversationState').style.display = 'block';
             
             addMessage('agent', data.greeting);
-            speak(data.greeting, currentCustomer.preferredLanguage);
+            // Use formatted speech text for natural pronunciation of currency, dates, etc.
+            speak(data.speechText || data.greeting, currentCustomer.preferredLanguage);
         }
     } catch (error) {
         console.error('Failed to start call:', error);
@@ -484,7 +492,8 @@ async function sendMessage() {
             removeTypingIndicator(typingId);
             addMessage('agent', data.response.message);
             updateConversationState(data.response);
-            speak(data.response.message, data.response.language);
+            // Use formatted speech text for natural pronunciation of currency, dates, etc.
+            speak(data.response.speechText || data.response.message, data.response.language);
         }
     } catch (error) {
         removeTypingIndicator(typingId);
@@ -1038,19 +1047,163 @@ function displayOffers(offers) {
 }
 
 /**
- * Text-to-Speech using browser API
+ * Preload voices to ensure they're available when needed
+ */
+function preloadVoices() {
+    if (!window.speechSynthesis) return;
+    
+    // Some browsers need this to load voices
+    const loadVoices = () => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length > 0) {
+            console.log(`🎙️ Loaded ${voices.length} voices for natural speech`);
+            
+            // Log available natural voices for debugging
+            const naturalVoices = voices.filter(v => 
+                v.lang.startsWith('en') &&
+                (v.name.toLowerCase().includes('google') ||
+                 v.name.toLowerCase().includes('samantha') ||
+                 v.name.toLowerCase().includes('zira') ||
+                 v.name.toLowerCase().includes('karen'))
+            );
+            if (naturalVoices.length > 0) {
+                console.log('🎙️ Natural voices available:', naturalVoices.map(v => v.name).join(', '));
+            }
+        }
+    };
+    
+    // Load voices immediately and also listen for the event
+    loadVoices();
+    if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+}
+
+/**
+ * Text-to-Speech using browser API with natural, warm voice
  */
 function speak(text, language = 'English') {
     if (!window.speechSynthesis) return;
     
+    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
     
-    const utterance = new SpeechSynthesisUtterance(text);
+    // Add natural pauses for better conversational flow
+    const naturalText = addNaturalPauses(text);
+    
+    const utterance = new SpeechSynthesisUtterance(naturalText);
+    
+    // Language settings
     utterance.lang = language === 'Spanish' ? 'es-US' : 'en-US';
-    utterance.rate = 0.9;
-    utterance.pitch = 1;
+    
+    // Natural, conversational settings
+    utterance.rate = 0.95;    // Slightly slower for warmth and clarity
+    utterance.pitch = 1.05;   // Slightly higher pitch for friendliness
+    utterance.volume = 1.0;   // Full volume for clarity
+    
+    // Select the most natural, warm voice available
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = selectNaturalVoice(voices, language);
+    if (preferredVoice) {
+        utterance.voice = preferredVoice;
+    }
+    
+    // Add emotion through event handlers
+    utterance.onstart = () => {
+        console.log('🎙️ Speaking with natural, warm tone...');
+    };
+    
+    utterance.onerror = (event) => {
+        console.error('Speech synthesis error:', event.error);
+    };
     
     window.speechSynthesis.speak(utterance);
+}
+
+/**
+ * Add natural pauses to text for more conversational flow
+ */
+function addNaturalPauses(text) {
+    if (!text) return text;
+    
+    // Add slight pauses after sentence markers for natural rhythm
+    let natural = text
+        .replace(/\. /g, '.  ')        // Pause after periods
+        .replace(/\? /g, '?  ')        // Pause after questions
+        .replace(/! /g, '!  ')         // Pause after exclamations
+        .replace(/\, /g, ', ')         // Slight pause after commas
+        .replace(/\; /g, ';  ')        // Pause after semicolons
+        .replace(/\: /g, ':  ');       // Pause after colons
+    
+    // Add natural pauses before important phrases
+    natural = natural
+        .replace(/\b(however|but|and|so|because|since|therefore)\b/gi, ' $1')
+        .replace(/\b(I understand|I see|I know|I can|let me)\b/gi, ' $1');
+    
+    return natural;
+}
+
+/**
+ * Select the most natural, warm voice for the given language
+ */
+function selectNaturalVoice(voices, language) {
+    if (!voices || voices.length === 0) return null;
+    
+    const isSpanish = language === 'Spanish';
+    const lang = isSpanish ? 'es' : 'en';
+    
+    // Priority list of natural-sounding voices
+    const preferredVoiceNames = isSpanish ? [
+        // Spanish - warm, natural voices
+        'Google español',
+        'Microsoft Helena',
+        'Paulina',
+        'Monica',
+        'Google español de Estados Unidos',
+        'Mónica',
+        'es-US',
+        'es-MX'
+    ] : [
+        // English - warm, natural, empathetic voices
+        'Google US English',
+        'Microsoft Zira',
+        'Samantha',           // macOS - very natural
+        'Karen',              // macOS - warm
+        'Moira',              // macOS - friendly
+        'Tessa',              // macOS - professional
+        'Microsoft Eva',      // Windows - natural
+        'Google UK English Female',
+        'en-US',
+        'en-GB'
+    ];
+    
+    // Try to find preferred voices (typically female voices sound warmer for customer service)
+    for (const name of preferredVoiceNames) {
+        const voice = voices.find(v => 
+            v.name.toLowerCase().includes(name.toLowerCase()) ||
+            v.lang.startsWith(lang)
+        );
+        if (voice) return voice;
+    }
+    
+    // Fallback: prefer local voices and female voices for warmth
+    const localVoices = voices.filter(v => v.lang.startsWith(lang) && v.localService);
+    if (localVoices.length > 0) {
+        // Prefer female voices (typically have "female" in name or higher pitch characteristics)
+        const femaleVoice = localVoices.find(v => 
+            v.name.toLowerCase().includes('female') ||
+            v.name.toLowerCase().includes('woman') ||
+            // Common female voice names
+            ['samantha', 'karen', 'moira', 'tessa', 'zira', 'eva', 'helena'].some(name => 
+                v.name.toLowerCase().includes(name)
+            )
+        );
+        if (femaleVoice) return femaleVoice;
+        return localVoices[0];
+    }
+    
+    // Last resort: any voice in the target language
+    return voices.find(v => v.lang.startsWith(lang)) || voices[0];
 }
 
 /**
