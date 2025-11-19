@@ -31,13 +31,15 @@ body {
 .header-content {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 20px;
 }
 
 .logo-title-container {
     display: flex;
     align-items: center;
     gap: 20px;
-    width: 100%;
+    flex: 1;
 }
 
 .app-logo {
@@ -62,6 +64,29 @@ body {
 .subtitle {
     color: #666;
     font-size: 1.1rem;
+}
+
+/* Settings Button */
+.btn-icon {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-icon:hover {
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
 /* Main Content Layout */
@@ -605,31 +630,13 @@ body {
     background: white;
 }
 
-.transcription-settings {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-    padding: 12px;
-    background: #f0f4ff;
-    border-radius: 8px;
-    border: 1px solid #d0deff;
-}
-
-.transcription-settings label {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #4a5568;
-    white-space: nowrap;
-}
-
 .transcription-select {
-    flex: 1;
-    padding: 8px 12px;
+    width: 100%;
+    padding: 10px 14px;
     border: 2px solid #667eea;
-    border-radius: 6px;
+    border-radius: 8px;
     background: white;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: #2d3748;
     cursor: pointer;
     transition: all 0.2s;
@@ -650,7 +657,45 @@ body {
     color: #a0aec0;
 }
 
-.input-controls {
+/* Voice Button Row (Top) */
+.voice-button-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.btn-voice-large {
+    padding: 20px 40px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    border-radius: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    min-width: 250px;
+}
+
+.btn-voice-large:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-voice-large:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-voice-large.recording {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff4757 100%);
+    animation: pulse 1.5s infinite;
+}
+
+/* Text Input Row (Bottom) */
+.text-input-row {
     display: flex;
     gap: 10px;
     align-items: center;
@@ -856,6 +901,88 @@ body {
 
 .transfer-summary .summary-item strong {
     color: #667eea;
+}
+
+/* Settings Modal Specific Styles */
+.modal-settings {
+    max-width: 600px;
+}
+
+.settings-section {
+    margin-bottom: 20px;
+}
+
+.settings-section h3 {
+    color: #667eea;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.setting-item {
+    margin-bottom: 20px;
+}
+
+.setting-label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.label-text {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.label-description {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: normal;
+}
+
+.setting-info {
+    margin-top: 20px;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8eeff 100%);
+    border: 2px solid #667eea;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.info-card h4 {
+    color: #667eea;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+}
+
+.info-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-card ul li {
+    padding: 6px 0;
+    color: #4a5568;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.info-card ul li::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: #667eea;
+    border-radius: 50%;
+    margin-right: 10px;
 }
 
 /* Loading Overlay */

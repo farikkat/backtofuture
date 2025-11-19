@@ -84,6 +84,7 @@ function setupEventListeners() {
     document.getElementById('startCallBtn').addEventListener('click', startCall);
     document.getElementById('endCallBtn').addEventListener('click', endCall);
     document.getElementById('transferBtn').addEventListener('click', transferToAgent);
+    document.getElementById('settingsBtn').addEventListener('click', openSettingsModal);
     
     document.getElementById('messageInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -93,7 +94,7 @@ function setupEventListeners() {
     });
     document.getElementById('sendBtn').addEventListener('click', sendMessage);
     document.getElementById('voiceBtn').addEventListener('click', toggleVoiceRecording);
-    document.getElementById('transcriptionMethod').addEventListener('change', handleTranscriptionMethodChange);
+    document.getElementById('settingsTranscriptionMethod').addEventListener('change', handleSettingsMethodChange);
     
     // Customer search event listeners
     const searchInput = document.getElementById('customerSearch');
@@ -137,21 +138,6 @@ function initializeTranscription() {
         transcriptionMethod = 'backend';
     }
     
-    // Update UI
-    const select = document.getElementById('transcriptionMethod');
-    if (select) {
-        select.value = transcriptionMethod;
-        
-        // Disable Web Speech option if not supported
-        if (!recognitionSupported) {
-            const option = select.querySelector('option[value="webspeech"]');
-            if (option) {
-                option.disabled = true;
-                option.textContent += ' (Not Supported)';
-            }
-        }
-    }
-    
     // Update voice button text
     updateVoiceButtonText();
     
@@ -159,16 +145,22 @@ function initializeTranscription() {
 }
 
 /**
- * Handle transcription method change
+ * Handle transcription method change in settings
  */
-function handleTranscriptionMethodChange(e) {
+function handleSettingsMethodChange(e) {
     const newMethod = e.target.value;
-    transcriptionMethod = newMethod;
-    localStorage.setItem('transcriptionMethod', newMethod);
-    console.log(`[Transcription] Switched to: ${newMethod}`);
     
-    // Update voice button text
-    updateVoiceButtonText();
+    // Update info cards
+    const webspeechInfo = document.getElementById('webspeechInfo');
+    const backendInfo = document.getElementById('backendInfo');
+    
+    if (newMethod === 'webspeech') {
+        webspeechInfo.style.display = 'block';
+        backendInfo.style.display = 'none';
+    } else {
+        webspeechInfo.style.display = 'none';
+        backendInfo.style.display = 'block';
+    }
 }
 
 /**
@@ -177,9 +169,9 @@ function handleTranscriptionMethodChange(e) {
 function updateVoiceButtonText() {
     const voiceBtn = document.getElementById('voiceBtn');
     if (transcriptionMethod === 'webspeech') {
-        voiceBtn.title = 'Click to speak (Web Speech API - Free & Fast)';
+        voiceBtn.title = 'Click to start speaking, click again to stop and send (Web Speech API)';
     } else {
-        voiceBtn.title = 'Hold to record audio (Backend Transcription)';
+        voiceBtn.title = 'Click to start recording, click again to stop and send (Backend Transcription)';
     }
 }
 
@@ -667,11 +659,16 @@ async function startWebSpeechRecognition() {
         speechRecognition.start();
         isRecording = true;
         
+        // Clear text input when switching to voice
+        const messageInput = document.getElementById('messageInput');
+        messageInput.value = '';
+        
         document.getElementById('voiceBtn').classList.add('recording');
+        document.getElementById('voiceBtnText').textContent = '🔴 Click To Stop And Send';
         document.getElementById('voiceStatus').style.display = 'flex';
         const statusText = document.getElementById('recordingText');
         if (statusText) {
-            statusText.innerHTML = '🎤 Listening... <strong>Speak now!</strong> (Click mic to stop)';
+            statusText.innerHTML = '🎤 Listening... <strong>Speak now!</strong> (Click mic to stop and send)';
         }
         
         console.log('[Web Speech] Initialization complete, waiting for recognition to start...');
@@ -682,9 +679,9 @@ async function startWebSpeechRecognition() {
 }
 
 /**
- * Stop Web Speech Recognition
+ * Stop Web Speech Recognition and send message
  */
-function stopWebSpeechRecognition() {
+async function stopWebSpeechRecognition() {
     if (speechRecognition) {
         speechRecognition.stop();
         speechRecognition = null;
@@ -692,7 +689,19 @@ function stopWebSpeechRecognition() {
     
     isRecording = false;
     document.getElementById('voiceBtn').classList.remove('recording');
+    document.getElementById('voiceBtnText').textContent = '🎤 Click To Speak';
     document.getElementById('voiceStatus').style.display = 'none';
+    
+    // Auto-send the captured message
+    const messageInput = document.getElementById('messageInput');
+    const messageText = messageInput.value.trim();
+    
+    if (messageText) {
+        console.log('[Web Speech] Auto-sending captured message:', messageText);
+        await sendMessage();
+    } else {
+        console.log('[Web Speech] No message captured to send');
+    }
 }
 
 /**
@@ -766,7 +775,12 @@ async function startRecording() {
         mediaRecorder.start(100); // Capture chunks every 100ms
         isRecording = true;
         
+        // Clear text input when switching to voice
+        const messageInput = document.getElementById('messageInput');
+        messageInput.value = '';
+        
         document.getElementById('voiceBtn').classList.add('recording');
+        document.getElementById('voiceBtnText').textContent = '🔴 Click To Stop And Send';
         document.getElementById('voiceStatus').style.display = 'flex';
         
         // Start recording timer
@@ -798,6 +812,7 @@ function stopRecording() {
         }
         
         document.getElementById('voiceBtn').classList.remove('recording');
+        document.getElementById('voiceBtnText').textContent = '🎤 Click To Speak';
         document.getElementById('voiceStatus').style.display = 'none';
         document.getElementById('recordingTimer').textContent = '0.0s';
     }
@@ -918,6 +933,77 @@ function confirmTransfer() {
     closeTransferModal();
     endCall();
     showSuccess('Call transferred to human agent successfully');
+}
+
+/**
+ * Open settings modal
+ */
+function openSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+    const select = document.getElementById('settingsTranscriptionMethod');
+    
+    // Load current settings
+    select.value = transcriptionMethod;
+    
+    // Update info cards based on current selection
+    const webspeechInfo = document.getElementById('webspeechInfo');
+    const backendInfo = document.getElementById('backendInfo');
+    
+    if (transcriptionMethod === 'webspeech') {
+        webspeechInfo.style.display = 'block';
+        backendInfo.style.display = 'none';
+    } else {
+        webspeechInfo.style.display = 'none';
+        backendInfo.style.display = 'block';
+    }
+    
+    // Disable Web Speech option if not supported
+    if (!recognitionSupported) {
+        const option = select.querySelector('option[value="webspeech"]');
+        if (option) {
+            option.disabled = true;
+            option.textContent = '🚀 Web Speech API (Not Supported in this browser)';
+        }
+    }
+    
+    modal.style.display = 'flex';
+}
+
+/**
+ * Close settings modal
+ */
+function closeSettingsModal() {
+    const modal = document.getElementById('settingsModal');
+    modal.style.display = 'none';
+}
+
+/**
+ * Save settings from modal
+ */
+function saveSettings() {
+    const select = document.getElementById('settingsTranscriptionMethod');
+    const newMethod = select.value;
+    
+    // Check if Web Speech is supported if user selected it
+    if (newMethod === 'webspeech' && !recognitionSupported) {
+        showError('Web Speech API is not supported in this browser. Please use Backend Transcription.');
+        return;
+    }
+    
+    // Save to global state and localStorage
+    transcriptionMethod = newMethod;
+    localStorage.setItem('transcriptionMethod', newMethod);
+    
+    // Update voice button text
+    updateVoiceButtonText();
+    
+    // Close modal
+    closeSettingsModal();
+    
+    // Show success message
+    showSuccess(`Settings saved! Voice input method set to: ${newMethod === 'webspeech' ? 'Web Speech API' : 'Backend Transcription'}`);
+    
+    console.log(`[Settings] Saved transcription method: ${newMethod}`);
 }
 
 /**

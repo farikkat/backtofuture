@@ -19,6 +19,9 @@
                         <p class="subtitle">Intelligent customer retention powered by Databricks AI</p>
                     </div>
                 </div>
+                <button id="settingsBtn" class="btn btn-icon" title="Settings">
+                    ⚙️
+                </button>
             </div>
         </header>
 
@@ -155,34 +158,82 @@
                 </div>
 
                 <div id="inputArea" class="input-area" style="display: none;">
-                    <div class="transcription-settings">
-                        <label for="transcriptionMethod">Voice Input Method:</label>
-                        <select id="transcriptionMethod" class="transcription-select">
-                            <option value="webspeech">🚀 Web Speech API (Free, Real-time)</option>
-                            <option value="backend">☁️ Backend Transcription (Accurate, Costs $)</option>
-                        </select>
-                    </div>
-                    <div class="input-controls">
-                        <button id="voiceBtn" class="btn btn-icon" title="Voice Input">
-                            🎤
+                    <!-- Voice Button Row (Top) -->
+                    <div class="voice-button-row">
+                        <button id="voiceBtn" class="btn btn-voice-large" title="Voice Input">
+                            <span id="voiceBtnText">🎤 Click To Speak</span>
                         </button>
+                    </div>
+                    
+                    <div id="voiceStatus" class="voice-status" style="display: none;">
+                        <span class="recording-indicator"></span>
+                        <span id="recordingText">Recording... <span id="recordingTimer">0.0s</span></span>
+                    </div>
+                    
+                    <!-- Text Input Row (Bottom) -->
+                    <div class="text-input-row">
                         <input 
                             type="text" 
                             id="messageInput" 
                             class="message-input" 
-                            placeholder="Type your message..."
+                            placeholder="Or type your message here..."
                             disabled
                         />
                         <button id="sendBtn" class="btn btn-primary" disabled>
                             Send
                         </button>
                     </div>
-                    <div id="voiceStatus" class="voice-status" style="display: none;">
-                        <span class="recording-indicator"></span>
-                        <span id="recordingText">Recording... <span id="recordingTimer">0.0s</span></span>
-                    </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal" style="display: none;">
+        <div class="modal-content modal-settings">
+            <div class="modal-header">
+                <h2>⚙️ Settings</h2>
+                <button class="modal-close" onclick="closeSettingsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-section">
+                    <h3>Voice Input Configuration</h3>
+                    <div class="setting-item">
+                        <label for="settingsTranscriptionMethod" class="setting-label">
+                            <span class="label-text">Transcription Method:</span>
+                            <span class="label-description">Choose how voice input is processed</span>
+                        </label>
+                        <select id="settingsTranscriptionMethod" class="transcription-select">
+                            <option value="webspeech">🚀 Web Speech API (Free, Real-time)</option>
+                            <option value="backend">☁️ Backend Transcription (Accurate, Costs $)</option>
+                        </select>
+                    </div>
+                    <div class="setting-info">
+                        <div class="info-card" id="webspeechInfo">
+                            <h4>🚀 Web Speech API</h4>
+                            <ul>
+                                <li>✅ Free - No API costs</li>
+                                <li>✅ Real-time - Instant transcription</li>
+                                <li>✅ Browser-based - Works in Chrome, Edge, Safari</li>
+                                <li>⚠️ Accuracy: 85-95% for English</li>
+                            </ul>
+                        </div>
+                        <div class="info-card" id="backendInfo" style="display: none;">
+                            <h4>☁️ Backend Transcription</h4>
+                            <ul>
+                                <li>✅ Best accuracy - 95-99%</li>
+                                <li>✅ Multi-format support</li>
+                                <li>⚠️ Costs money - $0.006 per minute</li>
+                                <li>⚠️ Slight delay for processing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSettingsModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            </div>
         </div>
     </div>
 

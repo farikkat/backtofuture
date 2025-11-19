@@ -102,7 +102,8 @@ Navigate to: **http://localhost:3000** in your browser
 - 🎭 **200+ Customer Profiles** - Diverse scenarios and demographics
 - 🌍 **Bilingual Support** - English & Spanish customers
 - 🎨 **Modern UI** - Real-time updates and animations
-- 🎤 **Voice Input** - Record and transcribe audio
+- 🎤 **Voice-First Design** - Large, prominent mic button on top, text input below (auto-clear after send)
+- 🎙️ **Click-to-Toggle Recording** - Click to start, click again to stop and auto-send
 - 🔊 **Voice Output** - Natural text-to-speech (e.g., "$29.99" → "twenty-nine ninety-nine")
 - 👩 **Female Voice Agents** - Exclusively professional female voices for warm, consistent service
 - 💝 **Natural & Warm Voice** - Emotionally attuned with empathetic pauses and human-like intonation
@@ -360,6 +361,8 @@ curl http://localhost:3001/api/customer/scenarios/list
 - **[Female Voice Agent Configuration](FEMALE_VOICE_AGENT.md)** - Exclusive female voice selection
 - **[Natural, Warm, & Empathetic Voice](NATURAL_WARM_VOICE.md)** - Emotionally attuned voice with human-like warmth
 - **[Fast & Concise Agent Configuration](FAST_CONCISE_AGENT.md)** - Optimized for speed and efficiency
+- **[UI Layout Update](UI_LAYOUT_UPDATE.md)** - Voice-first design with large mic button on top, text input below, auto-clear
+- **[Microphone Button Behavior](MIC_BUTTON_BEHAVIOR.md)** - Click-to-toggle voice input (start/stop/send)
 - **[Speech Formatting Guide](SPEECH_FORMATTING.md)** - Natural TTS pronunciation of currency, dates, etc.
 - **[Speech Formatting Quick Start](SPEECH_FORMATTING_QUICKSTART.md)** - Get started with natural speech in 5 minutes
 - **[Customer Search Feature](CUSTOMER_SEARCH_FEATURE.md)** - Type-ahead search implementation
